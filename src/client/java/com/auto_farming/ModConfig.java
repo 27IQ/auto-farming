@@ -15,16 +15,16 @@ public class ModConfig implements ConfigData {
         
     public static Screen build(Screen parent) {
         ConfigBuilder builder = ConfigBuilder.create()
-                .setParentScreen(parent) // now parent is properly defined
+                .setParentScreen(parent)
                 .setTitle(Text.of("Macro Settings"));
 
         ConfigCategory general = builder.getOrCreateCategory(Text.of("General"));
         ConfigEntryBuilder entryBuilder = builder.entryBuilder();
 
         general.addEntry(entryBuilder
-                .startEnumSelector(Text.of("Profile"), Profile.class, AutoFarm.current_profile)
+                .startEnumSelector(Text.of("Profile"), Profile.class, AutoFarm.getCurrent_profile())
                 .setDefaultValue(Profile.NETHERWART)
-                .setSaveConsumer(newValue -> AutoFarm.current_profile = newValue)
+                .setSaveConsumer(newValue -> AutoFarm.setCurrent_profile(newValue))
                 .build());
 
         general.addEntry(entryBuilder

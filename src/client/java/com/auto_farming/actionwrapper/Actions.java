@@ -35,9 +35,7 @@ public enum Actions {
                 if(action.stop){
                     action.key_mapping.setPressed(false);
                     action.stop=false;
-                }
-
-                if(action.active||action.key_mapping.isPressed()){
+                }else if(action.active||action.key_mapping.isPressed()){
                     action.key_mapping.setPressed(true);
                 }
             }

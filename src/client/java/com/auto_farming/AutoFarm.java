@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.auto_farming.gui.BasicHUD.setHudMessage;
-//import static com.auto_farm.gui.Alert.setAlertMessage;
+import static com.auto_farming.gui.Alert.setAlertMessage;
 
 import com.auto_farming.actionwrapper.Actions;
 import com.auto_farming.actionwrapper.Directions;
@@ -18,7 +18,7 @@ import com.auto_farming.moods.Mood;
 
 public class AutoFarm {
     //profile
-    public static Profile current_profile=Profile.values()[0];
+    private static Profile current_profile=Profile.values()[0];
     //state
     public static boolean is_active= false;
     private static boolean is_paused= false;
@@ -39,6 +39,19 @@ public class AutoFarm {
     private static long paused_time= 0L;
     private static long start_time= 0L;
     private static long interval_1= 0L;
+
+    public static void setCurrent_profile(Profile current_profile) {
+        if(is_active){
+            setAlertMessage("please deactivate the running profile first");
+            return;
+        }
+    
+        AutoFarm.current_profile = current_profile;
+    }
+
+    public static Profile getCurrent_profile() {
+        return current_profile;
+    }
 
     public static void pause_toggle(){
 
@@ -110,7 +123,6 @@ public class AutoFarm {
             long sleep_chunk = Math.min(polling_interval, remaining_time);
 
             row_pause();
-            check_and_reactivate_current_actions();
 
             long sleep_start = System.currentTimeMillis();
 
@@ -123,12 +135,11 @@ public class AutoFarm {
             long actual_sleep = System.currentTimeMillis() - sleep_start;
 
             row_pause();
-            if(!check_and_reactivate_current_actions()){
-                elapsed_time += actual_sleep;
 
-                if (debugging) {
-                    walked_time += actual_sleep;
-                }
+            elapsed_time += actual_sleep;
+
+            if (debugging) {
+                walked_time += actual_sleep;
             }
 
             if (current_mood_duration > 0) {
@@ -151,58 +162,6 @@ public class AutoFarm {
             handle_pause_state();
             if (is_active)
                 activate_current_Actions();
-        }
-    }
-
-    private static boolean check_and_reactivate_current_actions(){
-
-        boolean reactivated=false;
-
-        if(!check_current_actions_pressed()){
-                
-            Actions[] current_actions=current_direction==LEFT?current_profile.actions_left:current_profile.actions_right;
-            reactivate_action_array(current_actions);
-        }
-
-        if(!LEFT_CLICK.isActive()){
-            reactivated=true;
-            preciseSleep(Random(50L,100L));
-            LEFT_CLICK.activate();
-            preciseSleep(Random(50L,100L));
-        }
-
-        return reactivated;
-    }
-
-    private static boolean check_current_actions_pressed(){
-
-        if(current_direction==NONE)
-            return false;
-
-        Actions[] current_actions=current_direction==LEFT?current_profile.actions_left:current_profile.actions_right;
-
-        return check_actions_array_pressed(current_actions);
-    }
-
-    private static boolean check_actions_array_pressed(Actions[] actions_array){
-
-        for (Actions action: actions_array) {
-            if(!action.isActive()){
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private static void reactivate_action_array(Actions[] actions){
-
-        for (Actions action: actions) {
-            if(!action.isActive()){
-                preciseSleep(Random(50L,100L));
-                action.activate();
-                preciseSleep(Random(50L,100L));
-            }
         }
     }
 
@@ -240,13 +199,14 @@ public class AutoFarm {
         long pause_start = System.currentTimeMillis();
 
         while (is_active && is_paused) {
-            if (show_pause_Message){
+            if (show_pause_Message)
+                setHudMessage("PAUSED - Press F8 to resume");
+
                 try {
                     Thread.sleep(polling_interval);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-            }
 
             if (debugging)
                 paused_time += polling_interval;
@@ -256,8 +216,6 @@ public class AutoFarm {
             long actual_pause = System.currentTimeMillis() - pause_start;
             paused_time += actual_pause;
         }
-
-        setHudMessage("");
     }
 
     private static void activate_current_Actions(){
@@ -283,11 +241,11 @@ public class AutoFarm {
 
         for (int i=0;i<deviation.length - 1;i++) {
             current_action_order[i].deactivate();
-            preciseSleep(deviation[i + 1]);
+            preciseSleep(deviation[i]);
         }
 
         LEFT_CLICK.deactivate();
-        preciseSleep(deviation[0]);
+        preciseSleep(deviation[deviation.length - 1]);
     }
 
     private static Long[] get_click_deviation(int count) {
@@ -331,13 +289,15 @@ public class AutoFarm {
                 continue;
             }
 
+            boolean found_flag=false;
+
             for (Actions action : results) {
-                if (action == current_actions[pull]) {
-                    continue;
-                } else {
-                    results.add(current_actions[pull]);
-                }
+                if (action == current_actions[pull]) 
+                    found_flag=true;
             }
+
+            if(!found_flag)
+                results.add(current_actions[pull]);
         }
 
         return results.toArray(new Actions[0]);
@@ -365,16 +325,6 @@ public class AutoFarm {
             walked_time += current_profile.layer_swap_time;
 
         preciseSleep(current_profile.layer_swap_time);
-
-        while(true){
-            preciseSleep(current_profile.layer_swap_time);
-
-            if(check_actions_array_pressed(actions)){
-                break;
-            }else{
-                reactivate_action_array(actions);
-            }
-        }
 
         for (int i=0;i<actions.length;i++) {
             deactivate_current_Actions();
