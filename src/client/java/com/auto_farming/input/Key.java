@@ -11,15 +11,18 @@ public final class Key {
     public static final int START_LEFT_KEY  = GLFW.GLFW_KEY_F6;
     public static final int START_RIGHT_KEY = GLFW.GLFW_KEY_F7;
     public static final int PAUSE_KEY       = GLFW.GLFW_KEY_F9;
+    public static final int AUTO_SETUP_KEY       = GLFW.GLFW_KEY_F4;
 
     public static final String KEY_CAT = "Auto Farming";
     public static final String START_LEFT_ID  = "Start Left Direction";
     public static final String START_RIGHT_ID = "Start Right Direction";
     public static final String PAUSE_TOGGLE_ID= "Pause Toggle";
+    public static final String AUTO_SETUP_ID= "Auto Setup";
 
     public static KeyBinding start_left;
     public static KeyBinding start_right;
     public static KeyBinding pause_toggle;
+    public static KeyBinding auto_setup;
 
     public static void register() {
         start_left = KeyBindingHelper.registerKeyBinding(new KeyBinding(
@@ -30,6 +33,9 @@ public final class Key {
         ));
         pause_toggle = KeyBindingHelper.registerKeyBinding(new KeyBinding(
             PAUSE_TOGGLE_ID, InputUtil.Type.KEYSYM, PAUSE_KEY, KEY_CAT
+        ));
+        auto_setup= KeyBindingHelper.registerKeyBinding(new KeyBinding(
+            AUTO_SETUP_ID, InputUtil.Type.KEYSYM, AUTO_SETUP_KEY, KEY_CAT
         ));
     }
 }

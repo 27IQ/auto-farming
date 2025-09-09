@@ -25,4 +25,8 @@ public class KeyMapping {
     public static KeyBinding getAttackKey(){
         return client.options==null?null:client.options.attackKey;
     }
+
+    public static KeyBinding getSneakKey(){
+        return client.options==null?null:client.options.sneakKey;
+    }
 }

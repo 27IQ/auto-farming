@@ -4,7 +4,7 @@ import net.minecraft.client.option.KeyBinding;
 
 public enum Bindings {
 
-    START_LEFT(Key.start_left), START_RIGHT(Key.start_right), PAUSE_TOGGLE(Key.pause_toggle);
+    START_LEFT(Key.start_left), START_RIGHT(Key.start_right), PAUSE_TOGGLE(Key.pause_toggle), AUTO_SET_UP(Key.auto_setup);
 
     public final KeyBinding bind;
 

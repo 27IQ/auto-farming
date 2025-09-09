@@ -1,6 +1,7 @@
 package com.auto_farming;
 
 import static com.auto_farming.actionwrapper.Actions.LEFT_CLICK;
+import static com.auto_farming.actionwrapper.Actions.SNEAK;
 import static com.auto_farming.actionwrapper.Directions.LEFT;
 import static com.auto_farming.actionwrapper.Directions.NONE;
 import static com.auto_farming.actionwrapper.Directions.RIGHT;
@@ -15,6 +16,7 @@ import static com.auto_farming.gui.Alert.setAlertMessage;
 import com.auto_farming.actionwrapper.Actions;
 import com.auto_farming.actionwrapper.Directions;
 import com.auto_farming.actionwrapper.MouseLocker;
+import com.auto_farming.chat.WarpCommands;
 import com.auto_farming.farmprofiles.Profile;
 import com.auto_farming.moods.Mood;
 
@@ -68,6 +70,14 @@ public class AutoFarm {
         }else{
             MouseLocker.unlockMouse();
         }
+    }
+
+    public static void auto_set_up(){
+        WarpCommands.warp_garden();
+        preciseSleep(Random(150, 200));
+        SNEAK.activate();
+        preciseSleep(Random(500, 1000));
+        SNEAK.deactivate();
     }
 
     public static void run_farm(Directions direction) {

@@ -7,7 +7,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 
 public enum Actions {
-    WALK_FORWARD(), WALK_BACK(), WALK_LEFT(), WALK_RIGHT(), LEFT_CLICK();
+    WALK_FORWARD(), WALK_BACK(), WALK_LEFT(), WALK_RIGHT(), LEFT_CLICK(), SNEAK();
 
     private boolean active = false;
     private boolean stop=true;
@@ -26,6 +26,7 @@ public enum Actions {
                 Actions.WALK_BACK.key_mapping=KeyMapping.getBackKey();
                 Actions.WALK_RIGHT.key_mapping=KeyMapping.getRightKey();
                 Actions.LEFT_CLICK.key_mapping=KeyMapping.getAttackKey();
+                Actions.SNEAK.key_mapping=KeyMapping.getSneakKey();
             }
 
             if (client == null || client.player == null) return;
