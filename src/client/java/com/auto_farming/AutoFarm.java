@@ -150,7 +150,8 @@ public class AutoFarm {
                 switch_mood();
             }
 
-            setHudMessage(current_profile.name+"\nRow progress: " + Math.round((elapsed_time / total_time) * 1000) + "%\nCurrent mood: " +current_mood.name+ "\nRow time: "+ getTimeStringFromMillis(total_time) + "\nElapsed row time: " +getTimeStringFromMillis(elapsed_time)+ "\nMood Time: " +getTimeStringFromMillis(current_mood_duration) +" \nMood overshoot: "+ getTimeStringFromMillis(mood_overshoot));
+            double progress=((double)elapsed_time / total_time) * 100;
+            setHudMessage(current_profile.name+"\nRow progress: " + Math.round(progress) + "%\nCurrent mood: " +current_mood.name+ "\nRow time: "+ getTimeStringFromMillis(total_time) + "\nElapsed row time: " +getTimeStringFromMillis(elapsed_time)+ "\nMood Time: " +getTimeStringFromMillis(current_mood_duration) +" \nMood overshoot: "+ getTimeStringFromMillis(mood_overshoot));
         }
 
         deactivate_current_Actions();
@@ -186,7 +187,8 @@ public class AutoFarm {
 
             elapsed_void += sleep_chunk;
 
-            setHudMessage("Void drop: " + Math.round((elapsed_void / current_profile.void_drop_time) * 100) + "%");
+            double progress=((double)elapsed_void / current_profile.void_drop_time) * 100;
+            setHudMessage("Void drop: " + Math.round(progress) + "%");
 
             if (is_paused) {
                 handle_pause_state();
