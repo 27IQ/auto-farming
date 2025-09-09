@@ -1,9 +1,9 @@
 {
 	"required": true,
-	"package": "com.auto_farming.mixin.client",
+	"package": "com.auto_farming.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
-		"ExampleClientMixin"
+		"MouseMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

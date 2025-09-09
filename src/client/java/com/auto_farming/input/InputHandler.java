@@ -25,14 +25,12 @@ public class InputHandler {
             }
 		});
 
-
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (START_RIGHT.bind.wasPressed()) {
 				AutofarmingClient.LOGGER.info("pressed F7");
 				task_helper(RIGHT);
 			}
 		});
-
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (PAUSE_TOGGLE.bind.wasPressed()) {

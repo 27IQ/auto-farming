@@ -14,6 +14,7 @@ import static com.auto_farming.gui.Alert.setAlertMessage;
 
 import com.auto_farming.actionwrapper.Actions;
 import com.auto_farming.actionwrapper.Directions;
+import com.auto_farming.actionwrapper.MouseLocker;
 import com.auto_farming.farmprofiles.Profile;
 import com.auto_farming.moods.Mood;
 
@@ -61,6 +62,12 @@ public class AutoFarm {
 
         is_paused = !is_paused;
         AutofarmingClient.LOGGER.info("is_paused: "+is_paused);
+
+        if(MouseLocker.is_mouse_locked()){
+            MouseLocker.lockMouse();
+        }else{
+            MouseLocker.unlockMouse();
+        }
     }
 
     public static void run_farm(Directions direction) {
@@ -77,6 +84,7 @@ public class AutoFarm {
 
         is_active = true;
         is_paused = false;
+        MouseLocker.lockMouse();
 
         while (is_active) {
 
@@ -86,7 +94,7 @@ public class AutoFarm {
                 clear_row();
 
                 if (!is_active)
-                    return;
+                    break;
 
                 if (current_profile.layer_swap_time != 0)
                     layer_swap();
@@ -109,6 +117,8 @@ public class AutoFarm {
                     "\ninterval_duration: "+ interval_duration);
             }
         }
+
+        MouseLocker.unlockMouse();
     }
 
     private static void clear_row() {
@@ -162,10 +172,13 @@ public class AutoFarm {
     private static void row_pause(){
 
         if (is_paused) {
+            MouseLocker.unlockMouse();
             deactivate_current_Actions();
             handle_pause_state();
-            if (is_active)
+            if (is_active){
                 activate_current_Actions();
+                MouseLocker.lockMouse();
+            }
         }
     }
 
