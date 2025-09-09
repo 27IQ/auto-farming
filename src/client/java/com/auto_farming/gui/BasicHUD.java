@@ -17,15 +17,24 @@ public class BasicHUD {
             MinecraftClient client = MinecraftClient.getInstance();
             if (client.player == null) return;
 
+            String[] lines = hudMessage.split("\n");
+
             int screenWidth = client.getWindow().getScaledWidth();
             int screenHeight = client.getWindow().getScaledHeight();
-            int textWidth = client.textRenderer.getWidth(hudMessage);
 
-            int x = (screenWidth - textWidth) / 2;
-            int y = (screenHeight / 2) - (client.textRenderer.fontHeight / 2);
+            int totalHeight = lines.length * client.textRenderer.fontHeight;
+            int startY = (screenHeight / 2) - (totalHeight / 2);
 
-            drawContext.drawTextWithShadow(client.textRenderer, hudMessage, x, y, 0xFFFFFF);
+            for (int i = 0; i < lines.length; i++) {
+                String line = lines[i];
+                int textWidth = client.textRenderer.getWidth(line);
+                int x = (screenWidth - textWidth) / 2;
+                int y = startY + (i * client.textRenderer.fontHeight);
+
+                drawContext.drawTextWithShadow(client.textRenderer, line, x, y, 0xFFFFFF);
+            }
         });
-    }
+}
+
 }
 

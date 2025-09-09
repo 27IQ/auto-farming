@@ -1,5 +1,7 @@
 package com.auto_farming.gui;
 
+import com.auto_farming.AutofarmingClient;
+
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 
@@ -19,6 +21,8 @@ public class Alert {
         });
 
         stopThread.start();
+
+        AutofarmingClient.LOGGER.info("alert: "+alertMessage);
     }
 
     @SuppressWarnings("deprecation")
