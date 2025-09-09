@@ -24,7 +24,12 @@ public class ModConfig implements ConfigData {
         general.addEntry(entryBuilder
                 .startEnumSelector(Text.of("Profile"), Profile.class, AutoFarm.getCurrent_profile())
                 .setDefaultValue(Profile.NETHERWART)
+                .setEnumNameProvider((profile)->{return Text.of(profile.toString());})
                 .setSaveConsumer(newValue -> AutoFarm.setCurrent_profile(newValue))
+                .build());
+
+        general.addEntry(entryBuilder
+                .startTextDescription(Text.of("Current profile"+AutoFarm.getCurrent_profile().name))
                 .build());
 
         general.addEntry(entryBuilder

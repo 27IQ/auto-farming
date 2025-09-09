@@ -14,7 +14,6 @@ public enum Actions {
     private KeyBinding key_mapping;
     public static boolean first=true;
 
-
     public static void initActions(){
         ClientTickEvents.START_CLIENT_TICK.register(client -> {
             if(first){
