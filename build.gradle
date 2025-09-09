@@ -13,11 +13,19 @@ base {
 repositories {
     maven { url = 'https://maven.architectury.dev/' }
 	maven { url "https://maven.fabricmc.net/" }
+	maven { url "https://maven.terraformersmc.com/" }
     mavenCentral()
 }
 
 loom {
 	splitEnvironmentSourceSets()
+
+	runs {
+		client {
+			// change suspend=y if you want the game to wait for the debugger before starting
+			vmArgs "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+		}
+	}
 
 	mods {
 		"auto-farming" {
@@ -39,6 +47,8 @@ dependencies {
 
     // Cloth Config (remapped correctly)
     modImplementation("me.shedaniel.cloth:cloth-config-fabric:18.0.145")
+
+	modImplementation "com.terraformersmc:modmenu:14.0.0-rc.2"
 }
 
 processResources {

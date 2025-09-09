@@ -2,13 +2,17 @@ package com.auto_farming;
 
 import com.auto_farming.farmprofiles.Profile;
 
+import me.shedaniel.autoconfig.ConfigData;
+import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 
-public class ModConfig {
+@Config(name = "auto-farming")
+public class ModConfig implements ConfigData {
+        
     public static Screen build(Screen parent) {
         ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent) // now parent is properly defined

@@ -20,7 +20,7 @@ public class AutoFarm {
     //profile
     public static Profile current_profile=Profile.values()[0];
     //state
-    private static boolean is_active= false;
+    public static boolean is_active= false;
     private static boolean is_paused= false;
     private static Directions current_direction= NONE;
     //settings
@@ -40,7 +40,18 @@ public class AutoFarm {
     private static long start_time= 0L;
     private static long interval_1= 0L;
 
-    public static void run_farm() {
+    public static void pause_toggle(){
+
+        if (!is_active)
+            return;
+
+        is_paused = !is_paused;
+    }
+
+    public static void run_farm(Directions direction) {
+
+        if(is_active)
+            return;
 
         if (debugging) {
             start_time = System.currentTimeMillis();
@@ -49,6 +60,7 @@ public class AutoFarm {
             paused_time = 0L;
         }
 
+        current_direction=direction;
         is_active = true;
         is_paused = false;
 
@@ -135,11 +147,11 @@ public class AutoFarm {
     private static void row_pause(){
 
         if (is_paused) {
+            deactivate_current_Actions();
+            handle_pause_state();
+            if (is_active)
                 activate_current_Actions();
-                handle_pause_state();
-                if (is_active)
-                    deactivate_current_Actions();
-            }
+        }
     }
 
     private static boolean check_and_reactivate_current_actions(){
@@ -305,9 +317,9 @@ public class AutoFarm {
 
     private static Actions[] get_current_action_order() {
 
-        int min = 1;
+        int min = 0;
         Actions[] current_actions = get_current_direction_actions();
-        int max = current_actions.length;
+        int max = current_actions.length-1;
 
         List<Actions> results = new ArrayList<>();
 
