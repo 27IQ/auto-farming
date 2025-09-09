@@ -56,7 +56,7 @@ public class AutofarmingClient implements ClientModInitializer {
 		KeyBinding pause_toggle = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.auto-farming.pause_toggle", 
                 InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_F8,
+                GLFW.GLFW_KEY_F9,
                 "category.auto-farming"
         ));
 
