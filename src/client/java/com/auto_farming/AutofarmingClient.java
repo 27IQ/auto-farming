@@ -13,6 +13,7 @@ import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.auto_farming.actionwrapper.Actions;
 import com.auto_farming.actionwrapper.Directions;
 import com.auto_farming.gui.BasicHUD;
 
@@ -29,12 +30,10 @@ public class AutofarmingClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 	
+		Actions.initActions();
 		BasicHUD.registerHUD();
 		AutoConfig.register(ModConfig.class, Toml4jConfigSerializer::new);
 		registerKeybinds();
-
-		@SuppressWarnings("unused")
-		AutoFarm autoFarm=new AutoFarm();
 
 		LOGGER.info("auto-farm loaded successfully");
 	}
