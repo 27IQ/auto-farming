@@ -45,7 +45,7 @@ public class AutoFarm {
             setAlertMessage("please deactivate the running profile first");
             return;
         }
-    
+        
         AutoFarm.current_profile = current_profile;
     }
 
@@ -59,6 +59,7 @@ public class AutoFarm {
             return;
 
         is_paused = !is_paused;
+        AutofarmingClient.LOGGER.info("is_paused: "+is_paused);
     }
 
     public static void run_farm(Directions direction) {
@@ -73,12 +74,13 @@ public class AutoFarm {
             paused_time = 0L;
         }
 
-        current_direction=direction;
         is_active = true;
         is_paused = false;
 
         while (is_active) {
 
+            current_direction=direction;
+            
             for (int i=0;i<current_profile.layer_count;i++) {
                 clear_row();
 
@@ -148,7 +150,7 @@ public class AutoFarm {
                 switch_mood();
             }
 
-            setHudMessage(current_profile.name+"\nRow progress: " + Math.round((elapsed_time / total_time) * 100) + "%\nCurrent mood: " +current_mood.name+ "\nRow time: "+ getTimeStringFromMillis(total_time) + "\nElapsed row time: " +getTimeStringFromMillis(elapsed_time)+ "\nMood Time: " +getTimeStringFromMillis(current_mood_duration) +" \nMood overshoot: "+ getTimeStringFromMillis(mood_overshoot));
+            setHudMessage(current_profile.name+"\nRow progress: " + Math.round((elapsed_time / total_time) * 1000) + "%\nCurrent mood: " +current_mood.name+ "\nRow time: "+ getTimeStringFromMillis(total_time) + "\nElapsed row time: " +getTimeStringFromMillis(elapsed_time)+ "\nMood Time: " +getTimeStringFromMillis(current_mood_duration) +" \nMood overshoot: "+ getTimeStringFromMillis(mood_overshoot));
         }
 
         deactivate_current_Actions();
@@ -184,15 +186,12 @@ public class AutoFarm {
 
             elapsed_void += sleep_chunk;
 
-            if (debugging)
-                setHudMessage("Void drop: " + Math.round((elapsed_void / current_profile.void_drop_time) * 100) + "%");
+            setHudMessage("Void drop: " + Math.round((elapsed_void / current_profile.void_drop_time) * 100) + "%");
 
             if (is_paused) {
                 handle_pause_state();
             }
         }
-
-        setHudMessage("");
     }
 
     private static void handle_pause_state() {
@@ -200,7 +199,7 @@ public class AutoFarm {
 
         while (is_active && is_paused) {
             if (show_pause_Message)
-                setHudMessage("PAUSED - Press F8 to resume");
+                setHudMessage("PAUSED - Press F9 to resume");
 
                 try {
                     Thread.sleep(polling_interval);

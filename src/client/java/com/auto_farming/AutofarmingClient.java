@@ -62,6 +62,7 @@ public class AutofarmingClient implements ClientModInitializer {
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (start_left.wasPressed()) {
+				LOGGER.info("pressed F6");
 				task_helper(LEFT);
             }
 		});
@@ -69,6 +70,7 @@ public class AutofarmingClient implements ClientModInitializer {
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (start_right.wasPressed()) {
+				LOGGER.info("pressed F7");
 				task_helper(RIGHT);
 			}
 		});
@@ -76,6 +78,7 @@ public class AutofarmingClient implements ClientModInitializer {
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (pause_toggle.wasPressed()) {
+				LOGGER.info("pressed F9");
 				AutoFarm.pause_toggle();
 			}
 		});   
