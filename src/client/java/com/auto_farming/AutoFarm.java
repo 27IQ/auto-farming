@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.auto_farming.gui.BasicHUD.setHudMessage;
+import static com.auto_farming.input.Bindings.PAUSE_TOGGLE;
 import static com.auto_farming.gui.Alert.setAlertMessage;
 
 import com.auto_farming.actionwrapper.Actions;
@@ -201,7 +202,7 @@ public class AutoFarm {
 
         while (is_active && is_paused) {
             if (show_pause_Message)
-                setHudMessage("PAUSED - Press F9 to resume");
+                setHudMessage("PAUSED - Press "+PAUSE_TOGGLE.toString()+" to resume");
 
                 try {
                     Thread.sleep(polling_interval);
