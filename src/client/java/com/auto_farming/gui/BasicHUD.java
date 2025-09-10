@@ -15,7 +15,8 @@ public class BasicHUD {
     public static void registerHUD() {
         HudRenderCallback.EVENT.register((drawContext, tickDelta) -> {
             MinecraftClient client = MinecraftClient.getInstance();
-            if (client.player == null) return;
+            if (client.player == null)
+                return;
 
             String[] lines = hudMessage.split("\n");
 
@@ -34,7 +35,6 @@ public class BasicHUD {
                 drawContext.drawTextWithShadow(client.textRenderer, line, x, y, 0xFFFFFF);
             }
         });
-}
+    }
 
 }
-

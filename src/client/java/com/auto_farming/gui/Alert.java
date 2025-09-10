@@ -11,25 +11,26 @@ public class Alert {
 
     public static void setAlertMessage(String alertMessage) {
         Alert.alertMessage = alertMessage;
-        Thread stopThread=new Thread(()->{
+        Thread stopThread = new Thread(() -> {
             try {
-				Thread.sleep(3000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-            Alert.alertMessage="";
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            Alert.alertMessage = "";
         });
 
         stopThread.start();
 
-        AutofarmingClient.LOGGER.info("alert: "+alertMessage);
+        AutofarmingClient.LOGGER.info("alert: " + alertMessage);
     }
 
     @SuppressWarnings("deprecation")
     public static void registerHUD() {
         HudRenderCallback.EVENT.register((drawContext, tickDelta) -> {
             MinecraftClient client = MinecraftClient.getInstance();
-            if (client.player == null) return;
+            if (client.player == null)
+                return;
 
             int screenWidth = client.getWindow().getScaledWidth();
             int screenHeight = client.getWindow().getScaledHeight();

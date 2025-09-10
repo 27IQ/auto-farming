@@ -4,7 +4,7 @@ import net.minecraft.client.MinecraftClient;
 
 public class WarpCommands {
 
-    public static void warp_garden(){
+    public static void warpGarden() {
         MinecraftClient.getInstance().getNetworkHandler().sendChatMessage("/garden");
     }
 }

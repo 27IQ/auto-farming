@@ -1,6 +1,5 @@
 package com.auto_farming.input;
 
-import com.auto_farming.AutoFarm;
 import com.auto_farming.AutofarmingClient;
 import com.auto_farming.actionwrapper.Directions;
 
@@ -15,58 +14,58 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 
 public class InputHandler {
 
-    public static Thread farmThread=null;
+	public static Thread farmThread = null;
 
-    public static void registerKeybinds(){
-
-		ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (START_LEFT.bind.wasPressed()) {
-				AutofarmingClient.LOGGER.info("pressed "+START_LEFT.toString());
-				task_helper(LEFT);
-            }
-		});
+	public static void registerKeybinds() {
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (START_RIGHT.bind.wasPressed()) {
-				AutofarmingClient.LOGGER.info("pressed "+START_RIGHT.toString());
-				task_helper(RIGHT);
+			while (START_LEFT.bind.wasPressed()) {
+				AutofarmingClient.LOGGER.info("pressed " + START_LEFT.toString());
+				taskHelper(LEFT);
 			}
 		});
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (PAUSE_TOGGLE.bind.wasPressed()) {
-				AutofarmingClient.LOGGER.info("pressed "+PAUSE_TOGGLE.toString());
-				AutoFarm.pause_toggle();
+			while (START_RIGHT.bind.wasPressed()) {
+				AutofarmingClient.LOGGER.info("pressed " + START_RIGHT.toString());
+				taskHelper(RIGHT);
 			}
-		});   
+		});
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (AUTO_SET_UP.bind.wasPressed()) {
-				AutofarmingClient.LOGGER.info("pressed "+AUTO_SET_UP.toString());
-				Runnable set_up_task=()->{
-					AutoFarm.auto_set_up();
+			while (PAUSE_TOGGLE.bind.wasPressed()) {
+				AutofarmingClient.LOGGER.info("pressed " + PAUSE_TOGGLE.toString());
+				AutofarmingClient.autoFarm.pause_toggle();
+			}
+		});
+
+		ClientTickEvents.END_CLIENT_TICK.register(client -> {
+			while (AUTO_SET_UP.bind.wasPressed()) {
+				AutofarmingClient.LOGGER.info("pressed " + AUTO_SET_UP.toString());
+				Runnable setupTask = () -> {
+					AutofarmingClient.autoFarm.autoSetUp();
 				};
-				
-				Thread set_up_thread=new Thread(set_up_task);
-				set_up_thread.setDaemon(false);
-				set_up_thread.start();
+
+				Thread setupThread = new Thread(setupTask);
+				setupThread.setDaemon(false);
+				setupThread.start();
 			}
-		}); 
+		});
 	}
 
-	private static void task_helper(Directions direction){
-		
-		if(farmThread!=null){
-			AutoFarm.is_active=false;
-			farmThread=null;
+	private static void taskHelper(Directions direction) {
+
+		if (farmThread != null) {
+			AutofarmingClient.autoFarm.isActive = false;
+			farmThread = null;
 			return;
 		}
 
-		Runnable start_task=()->{
-			AutoFarm.run_farm(direction);
+		Runnable startTask = () -> {
+			AutofarmingClient.getNewAutofarmInstance().runFarm(direction);
 		};
 
-		farmThread=new Thread(start_task);
+		farmThread = new Thread(startTask);
 		farmThread.setDaemon(false);
 		farmThread.start();
 	}

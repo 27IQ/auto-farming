@@ -19,7 +19,7 @@
 			"com.auto_farming.AutofarmingClient"
 		],
 		"modmenu": [
-			"com.auto_farming.ModMenuIntegration"
+			"com.auto_farming.config.ModMenuIntegration"
 		]
 	},
 	"mixins": [

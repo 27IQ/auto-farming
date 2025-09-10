@@ -4,19 +4,19 @@ import net.minecraft.client.option.KeyBinding;
 
 public enum Bindings {
 
-    START_LEFT(Key.start_left), START_RIGHT(Key.start_right), PAUSE_TOGGLE(Key.pause_toggle), AUTO_SET_UP(Key.auto_setup);
+    START_LEFT(Key.startLeft), START_RIGHT(Key.startRight), PAUSE_TOGGLE(Key.pauseToggle), AUTO_SET_UP(Key.autoSetup);
 
     public final KeyBinding bind;
 
-    private Bindings(KeyBinding bind){
-        this.bind=bind;
+    private Bindings(KeyBinding bind) {
+        this.bind = bind;
     }
 
     @Override
     public String toString() {
 
-        String bind_string=PAUSE_TOGGLE.bind.getBoundKeyTranslationKey().toString();
-        String[] bind_arr=bind_string.split("\\.");
-        return bind_arr[bind_arr.length-1].toUpperCase();
+        String bindString = PAUSE_TOGGLE.bind.getBoundKeyTranslationKey().toString();
+        String[] bindArr = bindString.split("\\.");
+        return bindArr[bindArr.length - 1].toUpperCase();
     }
 }

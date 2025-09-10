@@ -6,6 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.auto_farming.actionwrapper.Actions;
+import com.auto_farming.config.ModConfig;
+import com.auto_farming.config.ModData;
+import com.auto_farming.config.SaveDataLoader;
 import com.auto_farming.gui.BasicHUD;
 import com.auto_farming.input.InputHandler;
 import com.auto_farming.input.Key;
@@ -15,12 +18,17 @@ import me.shedaniel.autoconfig.serializer.Toml4jConfigSerializer;
 
 public class AutofarmingClient implements ClientModInitializer {
 	public static final String MOD_ID = "auto-farming";
-	
+
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+
+	public static volatile ModData modData;
+	public static volatile AutoFarm autoFarm;
 
 	@Override
 	public void onInitializeClient() {
-	
+
+		modData=SaveDataLoader.load();
+
 		Actions.initActions();
 		BasicHUD.registerHUD();
 		AutoConfig.register(ModConfig.class, Toml4jConfigSerializer::new);
@@ -28,5 +36,10 @@ public class AutofarmingClient implements ClientModInitializer {
 		InputHandler.registerKeybinds();
 
 		LOGGER.info("auto-farming loaded successfully");
+	}
+
+	public static AutoFarm getNewAutofarmInstance(){
+		autoFarm=new AutoFarm(modData);
+		return autoFarm;
 	}
 }

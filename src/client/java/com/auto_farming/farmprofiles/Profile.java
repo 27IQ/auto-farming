@@ -13,33 +13,36 @@ import com.auto_farming.actionwrapper.Actions;
 @SuppressWarnings("unused")
 public enum Profile {
 
-    NETHERWART("5x5 Nether Warts @ 116 (0|0)", 96000, 96000, 3500, 0, 5, new Actions[]{WALK_LEFT},new Actions[]{WALK_RIGHT}, new Actions[]{}),
-    MUSHROOM("5x4 Mushroom @ 126 (25L|0)", 92000,97000, 3500, 0, 4, new Actions[]{WALK_FORWARD,WALK_LEFT},new Actions[]{WALK_RIGHT}, new Actions[]{});
+    NETHERWART("5x5 Nether Warts @ 116 (0|0)", 96000, 96000, 3500, 0, 5, new Actions[] { WALK_LEFT },
+            new Actions[] { WALK_RIGHT }, new Actions[] {}),
+    MUSHROOM("5x4 Mushroom @ 126 (25L|0)", 92000, 97000, 3500, 0, 4, new Actions[] { WALK_FORWARD, WALK_LEFT },
+            new Actions[] { WALK_RIGHT }, new Actions[] {});
 
-    private Profile(String name,long left_row_clear_time,long right_row_clear_time,long void_drop_time,long layer_swap_time, int layer_count, Actions[] actions_left, Actions[] actions_right, Actions[] actions_layer_swap){
-        this.name=name;
-        this.left_row_clear_time=left_row_clear_time; 
-        this.right_row_clear_time=right_row_clear_time;
-        this.void_drop_time=void_drop_time;
-        this.layer_swap_time=layer_swap_time;
-        this.layer_count=layer_count;
-        this.actions_left=actions_left; 
-        this.actions_right=actions_right;
-        this.actions_layer_swap=actions_layer_swap;
+    private Profile(String name, long leftRowClearTime, long rightRowClearTime, long voidDropTime, long layerSwapTime,
+            int layerCount, Actions[] actionsLeft, Actions[] actionsRight, Actions[] actionsLayerSwap) {
+        this.NAME = name;
+        this.LEFT_ROW_CLEAR_TIME = leftRowClearTime;
+        this.RIGHT_ROW_CLEAR_TIME = rightRowClearTime;
+        this.VOID_DROP_TIME = voidDropTime;
+        this.LAYER_SWAP_TIME = layerSwapTime;
+        this.LAYER_COUNT = layerCount;
+        this.ACTIONS_LEFT = actionsLeft;
+        this.ACTIONS_RIGHT = actionsRight;
+        this.ACTIONS_LAYER_SWAP = actionsLayerSwap;
     }
 
-    public final String name;
-    public final long left_row_clear_time; 
-    public final long right_row_clear_time;
-    public final long void_drop_time;
-    public final long layer_swap_time;
-    public final int layer_count;
-    public final Actions[] actions_left; 
-    public final Actions[] actions_right;
-    public final Actions[] actions_layer_swap;
+    public final String NAME;
+    public final long LEFT_ROW_CLEAR_TIME;
+    public final long RIGHT_ROW_CLEAR_TIME;
+    public final long VOID_DROP_TIME;
+    public final long LAYER_SWAP_TIME;
+    public final int LAYER_COUNT;
+    public final Actions[] ACTIONS_LEFT;
+    public final Actions[] ACTIONS_RIGHT;
+    public final Actions[] ACTIONS_LAYER_SWAP;
 
     @Override
-    public String toString(){
-        return this.name;
+    public String toString() {
+        return this.NAME;
     }
 }

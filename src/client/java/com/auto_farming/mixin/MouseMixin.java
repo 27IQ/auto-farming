@@ -13,7 +13,7 @@ public class MouseMixin {
 
     @Inject(method = "updateMouse(D)V", at = @At("HEAD"), cancellable = true)
     private void freezeLook(double timeDelta, CallbackInfo ci) {
-        if (MouseLocker.is_mouse_locked()) {
+        if (MouseLocker.isMouseLocked()) {
             ci.cancel();
         }
     }

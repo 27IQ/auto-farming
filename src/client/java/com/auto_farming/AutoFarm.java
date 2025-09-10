@@ -11,143 +11,194 @@ import java.util.List;
 
 import static com.auto_farming.gui.BasicHUD.setHudMessage;
 import static com.auto_farming.input.Bindings.PAUSE_TOGGLE;
-import static com.auto_farming.gui.Alert.setAlertMessage;
 
 import com.auto_farming.actionwrapper.Actions;
 import com.auto_farming.actionwrapper.Directions;
 import com.auto_farming.actionwrapper.MouseLocker;
 import com.auto_farming.chat.WarpCommands;
-import com.auto_farming.farmprofiles.Profile;
+import com.auto_farming.config.ModData;
 import com.auto_farming.moods.Mood;
 
 public class AutoFarm {
-    //profile
-    private static Profile current_profile=Profile.values()[0];
-    //state
-    public static boolean is_active= false;
-    private static boolean is_paused= false;
-    private static Directions current_direction= NONE;
-    //settings
-    private static long polling_interval= 100L;
-    public static boolean show_pause_Message= true;
-    //not yet implemented
-    //private static boolean pause_protection= true;
-    //moods
-    private static Mood current_mood= get_next_mood(); 
-    private static long current_mood_duration= 0L;
-    public static boolean force_attentive_mood= false;
+
+    private ModData currentModData;
+
+    // state
+    public boolean isActive = false;
+    private boolean isPaused = false;
+    private Directions currentDirection = NONE;
+    // settings
+    private long pollingInterval = 100L;
+    // not yet implemented
+    // private boolean pause_protection= true;
+    // moods
+    private Mood currentMood = getNextMood();
+    private long currentMoodDuration = 0L;
     // debugging
-    private static boolean debugging= false;
-    private static long added_time= 0L;
-    private static long walked_time= 0L;
-    private static long paused_time= 0L;
-    private static long start_time= 0L;
-    private static long interval_1= 0L;
+    private boolean debugging = false;
+    private long addedTime = 0L;
+    private long walkedTime = 0L;
+    private long pausedTime = 0L;
+    private long startTime = 0L;
+    private long interval_1 = 0L;
 
-    public static void setCurrent_profile(Profile current_profile) {
-        if(is_active){
-            setAlertMessage("please deactivate the running profile first");
-            return;
-        }
-        
-        AutoFarm.current_profile = current_profile;
+    public AutoFarm(ModData currentMoData){
+        this.currentModData=currentMoData;
     }
 
-    public static Profile getCurrent_profile() {
-        return current_profile;
+    public boolean isActive() {
+        return isActive;
     }
 
-    public static void pause_toggle(){
+    public void pause_toggle() {
 
-        if (!is_active)
+        if (!isActive)
             return;
 
-        is_paused = !is_paused;
-        AutofarmingClient.LOGGER.info("is_paused: "+is_paused);
+        isPaused = !isPaused;
+        AutofarmingClient.LOGGER.info("isPaused: " + isPaused);
 
-        if(MouseLocker.is_mouse_locked()){
+        if (MouseLocker.isMouseLocked()) {
             MouseLocker.lockMouse();
-        }else{
+        } else {
             MouseLocker.unlockMouse();
         }
     }
 
-    public static void auto_set_up(){
-        WarpCommands.warp_garden();
+    public void autoSetUp() {
+        WarpCommands.warpGarden();
         preciseSleep(Random(150, 200));
         SNEAK.activate();
         preciseSleep(Random(500, 1000));
         SNEAK.deactivate();
     }
 
-    public static void run_farm(Directions direction) {
+    public void runFarm(Directions direction) {
 
-        if(is_active)
+        if (isActive)
             return;
 
         if (debugging) {
-            start_time = System.currentTimeMillis();
-            added_time = 0L;
-            walked_time = 0L;
-            paused_time = 0L;
+            startTime = System.currentTimeMillis();
+            addedTime = 0L;
+            walkedTime = 0L;
+            pausedTime = 0L;
         }
 
-        is_active = true;
-        is_paused = false;
+        isActive = true;
+        isPaused = false;
         MouseLocker.lockMouse();
 
-        while (is_active) {
+        while (isActive) {
 
-            current_direction=direction;
-            
-            for (int i=0;i<current_profile.layer_count;i++) {
-                clear_row();
+            currentDirection = direction;
 
-                if (!is_active)
+            for (int i = 0; i < currentModData.getCurrentProfile().LAYER_COUNT; i++) {
+                clearRow();
+
+                if (!isActive)
                     break;
 
-                if (current_profile.layer_swap_time != 0)
+                if (currentModData.getCurrentProfile().LAYER_SWAP_TIME != 0)
                     layer_swap();
 
                 toggle_direction();
             }
 
-            handle_void_drop();
+            handleVoidDrop();
 
             if (debugging) {
                 interval_1 = System.currentTimeMillis();
-                long interval_duration = interval_1 - start_time;
+                long intervalDuration = interval_1 - startTime;
 
                 AutofarmingClient.LOGGER.info(
-                    "added_time: " +added_time +
-                    "\nwalked_time: "+ walked_time +
-                    "\npaused_time: " +paused_time+
-                    "\nstart_time: "+start_time+
-                    "\ninterval_time: "+ interval_1+
-                    "\ninterval_duration: "+ interval_duration);
+                        "added_time: " + addedTime +
+                                "\nwalked_time: " + walkedTime +
+                                "\npaused_time: " + pausedTime +
+                                "\nstart_time: " + startTime +
+                                "\ninterval_time: " + interval_1 +
+                                "\ninterval_duration: " + intervalDuration);
             }
         }
 
         MouseLocker.unlockMouse();
     }
 
-    private static void clear_row() {
+    private void clearRow() {
 
-        long mood_overshoot=get_mood_overshoot();
-        long total_time = get_current_row_clear_time() + Random(0, 250) + mood_overshoot;
+        long moodOvershoot = getMoodOvershoot();
+        long totalTime = getCurrentRowClearTime() + Random(0, 250) + moodOvershoot;
 
-        activate_current_Actions();
+        activateCurrentActions();
 
-        long elapsed_time = 0L;
+        long elapsedTime = 0L;
 
-        while (elapsed_time < total_time && is_active) {
+        while (elapsedTime < totalTime && isActive) {
 
-            long remaining_time = total_time - elapsed_time;
-            long sleep_chunk = Math.min(polling_interval, remaining_time);
+            long remainingTime = totalTime - elapsedTime;
+            long sleepChunk = Math.min(pollingInterval, remainingTime);
 
-            row_pause();
+            rowPause();
 
-            long sleep_start = System.currentTimeMillis();
+            long sleepStart = System.currentTimeMillis();
+
+            try {
+                Thread.sleep(sleepChunk);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            long actualSleep = System.currentTimeMillis() - sleepStart;
+
+            rowPause();
+
+            elapsedTime += actualSleep;
+
+            if (debugging) {
+                walkedTime += actualSleep;
+            }
+
+            if (currentMoodDuration > 0) {
+                currentMoodDuration -= actualSleep;
+            } else {
+                switchMood();
+            }
+
+            double progress = ((double) elapsedTime / totalTime) * 100;
+            setHudMessage(currentModData.getCurrentProfile().NAME + "\nRow progress: " + Math.round(progress) + "%\nCurrent mood: "
+                    + currentMood.NAME + "\nRow time: " + getTimeStringFromMillis(totalTime) + "\nElapsed row time: "
+                    + getTimeStringFromMillis(elapsedTime) + "\nMood Time: "
+                    + getTimeStringFromMillis(currentMoodDuration) + " \nMood overshoot: "
+                    + getTimeStringFromMillis(moodOvershoot));
+        }
+
+        deactivateCurrentActions();
+        setHudMessage("");
+    }
+
+    private void rowPause() {
+
+        if (isPaused) {
+            MouseLocker.unlockMouse();
+            deactivateCurrentActions();
+            handlePauseState();
+            if (isActive) {
+                activateCurrentActions();
+                MouseLocker.lockMouse();
+            }
+        }
+    }
+
+    private void handleVoidDrop() {
+
+        if (debugging)
+            walkedTime += currentModData.getCurrentProfile().VOID_DROP_TIME;
+
+        long elapsedVoid = 0L;
+
+        while (elapsedVoid < currentModData.getCurrentProfile().VOID_DROP_TIME && isActive) {
+            long remaining_void = currentModData.getCurrentProfile().VOID_DROP_TIME - elapsedVoid;
+            long sleep_chunk = Math.min(pollingInterval, remaining_void);
 
             try {
                 Thread.sleep(sleep_chunk);
@@ -155,117 +206,63 @@ public class AutoFarm {
                 e.printStackTrace();
             }
 
-            long actual_sleep = System.currentTimeMillis() - sleep_start;
+            elapsedVoid += sleep_chunk;
 
-            row_pause();
+            double progress = ((double) elapsedVoid / currentModData.getCurrentProfile().VOID_DROP_TIME) * 100;
+            setHudMessage("Void drop: " + Math.round(progress) + "%");
 
-            elapsed_time += actual_sleep;
-
-            if (debugging) {
-                walked_time += actual_sleep;
-            }
-
-            if (current_mood_duration > 0) {
-                current_mood_duration -= actual_sleep;
-            }else{
-                switch_mood();
-            }
-
-            double progress=((double)elapsed_time / total_time) * 100;
-            setHudMessage(current_profile.name+"\nRow progress: " + Math.round(progress) + "%\nCurrent mood: " +current_mood.name+ "\nRow time: "+ getTimeStringFromMillis(total_time) + "\nElapsed row time: " +getTimeStringFromMillis(elapsed_time)+ "\nMood Time: " +getTimeStringFromMillis(current_mood_duration) +" \nMood overshoot: "+ getTimeStringFromMillis(mood_overshoot));
-        }
-
-        deactivate_current_Actions();
-        setHudMessage("");
-    }
-
-    private static void row_pause(){
-
-        if (is_paused) {
-            MouseLocker.unlockMouse();
-            deactivate_current_Actions();
-            handle_pause_state();
-            if (is_active){
-                activate_current_Actions();
-                MouseLocker.lockMouse();
+            if (isPaused) {
+                handlePauseState();
             }
         }
     }
 
-    private static void handle_void_drop() {
+    private void handlePauseState() {
+        long pauseStart = System.currentTimeMillis();
 
-        if (debugging)
-            walked_time += current_profile.void_drop_time;
-
-        long elapsed_void = 0L;
-
-        while (elapsed_void < current_profile.void_drop_time && is_active) {
-            long remaining_void = current_profile.void_drop_time - elapsed_void;
-            long sleep_chunk = Math.min(polling_interval, remaining_void);
+        while (isActive && isPaused) {
+            if (currentModData.showPauseMessage())
+                setHudMessage("PAUSED - Press " + PAUSE_TOGGLE.toString() + " to resume");
 
             try {
-                Thread.sleep( sleep_chunk);
+                Thread.sleep(pollingInterval);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
-            elapsed_void += sleep_chunk;
-
-            double progress=((double)elapsed_void / current_profile.void_drop_time) * 100;
-            setHudMessage("Void drop: " + Math.round(progress) + "%");
-
-            if (is_paused) {
-                handle_pause_state();
-            }
-        }
-    }
-
-    private static void handle_pause_state() {
-        long pause_start = System.currentTimeMillis();
-
-        while (is_active && is_paused) {
-            if (show_pause_Message)
-                setHudMessage("PAUSED - Press "+PAUSE_TOGGLE.toString()+" to resume");
-
-                try {
-                    Thread.sleep(polling_interval);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
             if (debugging)
-                paused_time += polling_interval;
+                pausedTime += pollingInterval;
         }
 
         if (debugging) {
-            long actual_pause = System.currentTimeMillis() - pause_start;
-            paused_time += actual_pause;
+            long actualPause = System.currentTimeMillis() - pauseStart;
+            pausedTime += actualPause;
         }
     }
 
-    private static void activate_current_Actions(){
-        Long[] deviation = get_click_deviation(get_current_direction_actions().length);
-        boolean miss = get_click_delay_miss();
-        Actions[] current_action_order = get_current_action_order();
+    private void activateCurrentActions() {
+        Long[] deviation = getClickDeviation(getCurrentDirectionActions().length);
+        boolean miss = getClickDelayMiss();
+        Actions[] currentActionOrder = getCurrentActionOrder();
 
         preciseSleep(10L);
         LEFT_CLICK.activate();
         preciseSleep((miss ? 0 : 500) + deviation[0]);
 
-        for (int i=0; i<deviation.length - 1;i++) {
-            current_action_order[i].activate();
+        for (int i = 0; i < deviation.length - 1; i++) {
+            currentActionOrder[i].activate();
             preciseSleep(deviation[i + 1]);
         }
     }
 
-    private static void deactivate_current_Actions(){
-        Long[] deviation = get_click_deviation(get_current_direction_actions().length);
-        Actions[] current_action_order = get_current_action_order();
+    private void deactivateCurrentActions() {
+        Long[] deviation = getClickDeviation(getCurrentDirectionActions().length);
+        Actions[] currentActionOrder = getCurrentActionOrder();
 
         preciseSleep(10L);
 
-        for (int i=0;i<deviation.length - 1;i++) {
-            current_action_order[i].deactivate();
+        for (int i = 0; i < deviation.length - 1; i++) {
+            currentActionOrder[i].deactivate();
             preciseSleep(deviation[i]);
         }
 
@@ -273,151 +270,151 @@ public class AutoFarm {
         preciseSleep(deviation[deviation.length - 1]);
     }
 
-    private static Long[] get_click_deviation(int count) {
+    private Long[] getClickDeviation(int count) {
 
         int rand = Random(50, 100);
-        long mood_click_delay=getMoodClickDelay();
+        long moodClickDelay = getMoodClickDelay();
 
         List<Long> result = new ArrayList<>();
-        result.add(rand + mood_click_delay);
+        result.add(rand + moodClickDelay);
 
-        for(int i=0;i<count;i++) {
+        for (int i = 0; i < count; i++) {
             result.add(Random(0L, 70L));
         }
 
         return result.toArray(new Long[0]);
     }
 
-    private static long getMoodClickDelay(){
-        long delay=current_mood.click_delay;
+    private long getMoodClickDelay() {
+        long delay = currentMood.CLICK_DELAY;
 
-        if(force_attentive_mood){
-            delay=Mood.ATTENTIVE.click_delay;
+        if (currentModData.forceAttentiveMood()) {
+            delay = Mood.ATTENTIVE.CLICK_DELAY;
         }
 
         return delay;
     }
 
-    private static Actions[] get_current_action_order() {
+    private Actions[] getCurrentActionOrder() {
 
         int min = 0;
-        Actions[] current_actions = get_current_direction_actions();
-        int max = current_actions.length-1;
+        Actions[] currentActions = getCurrentDirectionActions();
+        int max = currentActions.length - 1;
 
         List<Actions> results = new ArrayList<>();
 
-        while (results.size() < current_actions.length) {
-            int  pull = Random(min, max);
+        while (results.size() < currentActions.length) {
+            int pull = Random(min, max);
 
             if (results.size() == 0) {
-                results.add(current_actions[pull]);
+                results.add(currentActions[pull]);
                 continue;
             }
 
-            boolean found_flag=false;
+            boolean foundFlag = false;
 
             for (Actions action : results) {
-                if (action == current_actions[pull]) 
-                    found_flag=true;
+                if (action == currentActions[pull])
+                    foundFlag = true;
             }
 
-            if(!found_flag)
-                results.add(current_actions[pull]);
+            if (!foundFlag)
+                results.add(currentActions[pull]);
         }
 
         return results.toArray(new Actions[0]);
     }
 
-    private static boolean get_click_delay_miss() {
+    private boolean getClickDelayMiss() {
 
         long pull = Random(0L, 1L);
 
         return pull == 1 ? true : false;
     }
 
-    private static void layer_swap() {
+    private void layer_swap() {
 
-        Actions[] actions = current_profile.actions_layer_swap;
+        Actions[] actions = currentModData.getCurrentProfile().ACTIONS_LAYER_SWAP;
 
-        Long[] deviation = get_click_deviation(actions.length * 2);
+        Long[] deviation = getClickDeviation(actions.length * 2);
 
-        for (int i=0;i<actions.length;i++) {
+        for (int i = 0; i < actions.length; i++) {
             actions[i].activate();
             preciseSleep(deviation[i]);
         }
 
         if (debugging)
-            walked_time += current_profile.layer_swap_time;
+            walkedTime += currentModData.getCurrentProfile().LAYER_SWAP_TIME;
 
-        preciseSleep(current_profile.layer_swap_time);
+        preciseSleep(currentModData.getCurrentProfile().LAYER_SWAP_TIME);
 
-        for (int i=0;i<actions.length;i++) {
-            deactivate_current_Actions();
+        for (int i = 0; i < actions.length; i++) {
+            deactivateCurrentActions();
             preciseSleep(deviation[actions.length + i]);
         }
     }
 
-    private static void toggle_direction() {
-        current_direction = current_direction == LEFT ? RIGHT : LEFT;
+    private void toggle_direction() {
+        currentDirection = currentDirection == LEFT ? RIGHT : LEFT;
     }
 
-    private static Actions[] get_current_direction_actions() {
-        return current_direction == LEFT ? current_profile.actions_left : current_profile.actions_right;
+    private Actions[] getCurrentDirectionActions() {
+        return currentDirection == LEFT ? currentModData.getCurrentProfile().ACTIONS_LEFT : currentModData.getCurrentProfile().ACTIONS_RIGHT;
     }
 
-    private static long get_current_row_clear_time() {
-        return current_direction == LEFT ? current_profile.left_row_clear_time : current_profile.right_row_clear_time;
+    private long getCurrentRowClearTime() {
+        return currentDirection == LEFT ? currentModData.getCurrentProfile().LEFT_ROW_CLEAR_TIME : currentModData.getCurrentProfile().RIGHT_ROW_CLEAR_TIME;
     }
 
-    private static long get_mood_overshoot() {
+    private long getMoodOvershoot() {
 
         long overshoot = 0L;
 
-        if (force_attentive_mood || current_mood.overshoot_duration == 0)
+        if (currentModData.forceAttentiveMood() || currentMood.OVERSHOOT_DURATION == 0)
             return overshoot;
 
         long roll = Random(0L, 1L);
 
-        if (current_mood.overshoot_chance <= roll) {
-            long min_dur = current_mood.overshoot_duration - current_mood.overshoot_duration_variable;
-            long max_dur = current_mood.overshoot_duration + current_mood.overshoot_duration_variable;
-            overshoot = Random(min_dur, max_dur);
+        if (currentMood.OVERSHOOT_CHANCE <= roll) {
+            long minDur = currentMood.OVERSHOOT_DURATION - currentMood.OVERSHOOT_DURATION_VARIABLE;
+            long maxDur = currentMood.OVERSHOOT_DURATION + currentMood.OVERSHOOT_DURATION_VARIABLE;
+            overshoot = Random(minDur, maxDur);
         }
 
         return overshoot;
     }
 
-    private static void switch_mood() {
-        Mood new_mood = get_next_mood();
+    private void switchMood() {
+        Mood newMood = getNextMood();
 
-        current_mood = new_mood;
-        current_mood_duration = Random(current_mood.mood_min_duration, current_mood.mood_max_duration);
+        currentMood = newMood;
+        currentMoodDuration = Random(currentMood.MOOD_MIN_DURATION, currentMood.MOOD_MAX_DURATION);
     }
 
-    private static Mood get_next_mood() {
-        List<Double> chances=new ArrayList<>();
+    private Mood getNextMood() {
+        List<Double> chances = new ArrayList<>();
 
         for (Mood mood : Mood.values()) {
-            chances.add(mood.mood_chance);
+            chances.add(mood.MOOD_CHANCE);
         }
 
-        double current_threshold = 0.0;
+        double currentThreshold = 0.0;
         int roll = Random(0, 1);
 
-        int selected_mood_index = 0;
+        int selectedMoodIndex = 0;
 
-        for (int i=0;i<chances.size();i++) {
-            current_threshold += chances.get(i);
+        for (int i = 0; i < chances.size(); i++) {
+            currentThreshold += chances.get(i);
 
-            if (selected_mood_index == 0 && current_threshold <= roll) {
-                selected_mood_index = i;
+            if (selectedMoodIndex == 0 && currentThreshold <= roll) {
+                selectedMoodIndex = i;
             }
         }
 
-        return Mood.values()[selected_mood_index];
+        return Mood.values()[selectedMoodIndex];
     }
 
-    private static void preciseSleep(long ms) {
+    private void preciseSleep(long ms) {
         long start = System.nanoTime();
         long end = start + ms * 1_000_000L;
 
@@ -431,11 +428,11 @@ public class AutoFarm {
         }
 
         while (System.nanoTime() < end) {
-            Thread.onSpinWait(); 
+            Thread.onSpinWait();
         }
     }
 
-    private static String getTimeStringFromMillis(long millis) {
+    private String getTimeStringFromMillis(long millis) {
         long minutes = millis / 60000;
         long seconds = (millis % 60000) / 1000;
         long milliseconds = millis % 1000;
@@ -444,18 +441,18 @@ public class AutoFarm {
         return String.format("%d:%02d,%03d", minutes, seconds, milliseconds);
     }
 
-    public static long Random(long min, long max){
-        if (min > max) 
+    public long Random(long min, long max) {
+        if (min > max)
             throw new IllegalArgumentException("min must be <= max");
 
-        return min + (long)(Math.random() * ((max - min) + 1));
+        return min + (long) (Math.random() * ((max - min) + 1));
     }
 
-    public static int Random(int min, int max){
-        if (min > max) 
+    public int Random(int min, int max) {
+        if (min > max)
             throw new IllegalArgumentException("min must be <= max");
-            
-        return min + (int)(Math.random() * ((max - min) + 1));
+
+        return min + (int) (Math.random() * ((max - min) + 1));
     }
-        
+
 }

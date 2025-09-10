@@ -1,5 +1,5 @@
 
-package com.auto_farming;
+package com.auto_farming.config;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;

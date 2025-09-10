@@ -3,25 +3,25 @@ package com.auto_farming.actionwrapper;
 import com.auto_farming.AutofarmingClient;
 
 public class MouseLocker {
-    private static boolean is_mouse_locked=false;
+    private static boolean isMouseLocked = false;
 
-    public static void unlockMouse(){
-        if(!is_mouse_locked)
+    public static void unlockMouse() {
+        if (!isMouseLocked)
             return;
 
-        is_mouse_locked=false;
+        isMouseLocked = false;
         AutofarmingClient.LOGGER.info("mouse unlocked");
     }
 
-    public static void lockMouse(){
-        if(is_mouse_locked)
-           return;
+    public static void lockMouse() {
+        if (isMouseLocked)
+            return;
 
-        is_mouse_locked=true;
+        isMouseLocked = true;
         AutofarmingClient.LOGGER.info("mouse locked");
     }
 
-    public static boolean is_mouse_locked(){
-        return is_mouse_locked;
+    public static boolean isMouseLocked() {
+        return isMouseLocked;
     }
 }
