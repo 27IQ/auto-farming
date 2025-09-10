@@ -20,46 +20,46 @@ public class SaveDataLoader {
     private static Path configDir = FabricLoader.getInstance().getConfigDir();
     private static Path autoFarmingConfigPath = configDir.resolve(AutofarmingClient.MOD_ID + ".json");
 
-    public static ModData load(){
+    public static ModData load() {
         String configString;
-        
+
         try {
-            configString=readFromInputStream(new FileInputStream(autoFarmingConfigPath.toFile()));
+            configString = readFromInputStream(new FileInputStream(autoFarmingConfigPath.toFile()));
         } catch (IOException e) {
             AutofarmingClient.LOGGER.error(e.getMessage(), e);
             e.printStackTrace();
             return new ModData();
         }
 
-        AutofarmingClient.LOGGER.info("loading: "+configString);
+        AutofarmingClient.LOGGER.info("loading: " + configString);
 
         ObjectMapper objectMapper = new ObjectMapper();
         ModData data;
 
         try {
-            data = objectMapper.readValue(configString,ModData.class);
+            data = objectMapper.readValue(configString, ModData.class);
         } catch (JsonProcessingException e) {
             AutofarmingClient.LOGGER.error(e.getMessage(), e);
             e.printStackTrace();
             return new ModData();
         }
-        
+
         return data;
     }
 
     public static void save(ModData data) {
-        ObjectMapper objectMapper=new ObjectMapper();
+        ObjectMapper objectMapper = new ObjectMapper();
         String json;
 
         try {
-            json=objectMapper.writeValueAsString(data);
+            json = objectMapper.writeValueAsString(data);
         } catch (JsonProcessingException e) {
             AutofarmingClient.LOGGER.error(e.getMessage(), e);
             e.printStackTrace();
             return;
         }
 
-        AutofarmingClient.LOGGER.info("saving: "+json);
+        AutofarmingClient.LOGGER.info("saving: " + json);
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(autoFarmingConfigPath.toFile()))) {
             writer.write(json);

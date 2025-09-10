@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.auto_farming.actionwrapper.Actions;
+import com.auto_farming.chat.Commands;
 import com.auto_farming.config.ModConfig;
 import com.auto_farming.config.ModData;
 import com.auto_farming.config.SaveDataLoader;
@@ -34,6 +35,7 @@ public class AutofarmingClient implements ClientModInitializer {
 		AutoConfig.register(ModConfig.class, Toml4jConfigSerializer::new);
 		Key.register();
 		InputHandler.registerKeybinds();
+		Commands.registerCommandQueue();
 
 		LOGGER.info("auto-farming loaded successfully");
 	}

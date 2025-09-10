@@ -42,13 +42,8 @@ public class InputHandler {
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			while (AUTO_SET_UP.bind.wasPressed()) {
 				AutofarmingClient.LOGGER.info("pressed " + AUTO_SET_UP.toString());
-				Runnable setupTask = () -> {
-					AutofarmingClient.autoFarm.autoSetUp();
-				};
 
-				Thread setupThread = new Thread(setupTask);
-				setupThread.setDaemon(false);
-				setupThread.start();
+				Thread.ofPlatform().daemon(false).start(() -> AutofarmingClient.autoFarm.autoSetUp());
 			}
 		});
 	}
@@ -61,12 +56,8 @@ public class InputHandler {
 			return;
 		}
 
-		Runnable startTask = () -> {
+		farmThread = Thread.ofPlatform().daemon(false).start(() -> {
 			AutofarmingClient.getNewAutofarmInstance().runFarm(direction);
-		};
-
-		farmThread = new Thread(startTask);
-		farmThread.setDaemon(false);
-		farmThread.start();
+		});
 	}
 }

@@ -49,7 +49,7 @@ public class ModConfig implements ConfigData {
 				.setSaveConsumer(newValue -> modData.setForceAttentiveMood(newValue))
 				.build());
 
-		builder.setSavingRunnable(()->{
+		builder.setSavingRunnable(() -> {
 			SaveDataLoader.save(AutofarmingClient.modData);
 		});
 

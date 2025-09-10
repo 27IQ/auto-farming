@@ -15,7 +15,7 @@ import static com.auto_farming.input.Bindings.PAUSE_TOGGLE;
 import com.auto_farming.actionwrapper.Actions;
 import com.auto_farming.actionwrapper.Directions;
 import com.auto_farming.actionwrapper.MouseLocker;
-import com.auto_farming.chat.WarpCommands;
+import com.auto_farming.chat.Commands;
 import com.auto_farming.config.ModData;
 import com.auto_farming.moods.Mood;
 
@@ -65,8 +65,8 @@ public class AutoFarm {
         }
     }
 
-    public void autoSetUp() {
-        WarpCommands.warpGarden();
+    public static void autoSetUp() {
+        Commands.warpGarden();
         preciseSleep(Random(150, 200));
         SNEAK.activate();
         preciseSleep(Random(500, 1000));
@@ -417,7 +417,7 @@ public class AutoFarm {
         return Mood.values()[selectedMoodIndex];
     }
 
-    private void preciseSleep(long ms) {
+    private static void preciseSleep(long ms) {
         long start = System.nanoTime();
         long end = start + ms * 1_000_000L;
 
@@ -444,14 +444,14 @@ public class AutoFarm {
         return String.format("%d:%02d,%03d", minutes, seconds, milliseconds);
     }
 
-    public long Random(long min, long max) {
+    public static long Random(long min, long max) {
         if (min > max)
             throw new IllegalArgumentException("min must be <= max");
 
         return min + (long) (Math.random() * ((max - min) + 1));
     }
 
-    public int Random(int min, int max) {
+    public static int Random(int min, int max) {
         if (min > max)
             throw new IllegalArgumentException("min must be <= max");
 
