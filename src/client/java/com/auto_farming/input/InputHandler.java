@@ -8,6 +8,9 @@ import static com.auto_farming.actionwrapper.Directions.RIGHT;
 import static com.auto_farming.input.Bindings.PAUSE_TOGGLE;
 import static com.auto_farming.input.Bindings.START_LEFT;
 import static com.auto_farming.input.Bindings.START_RIGHT;
+
+import com.auto_farming.AutoFarm;
+
 import static com.auto_farming.input.Bindings.AUTO_SET_UP;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -43,7 +46,7 @@ public class InputHandler {
 			while (AUTO_SET_UP.bind.wasPressed()) {
 				AutofarmingClient.LOGGER.info("pressed " + AUTO_SET_UP.toString());
 
-				Thread.ofPlatform().daemon(false).start(() -> AutofarmingClient.autoFarm.autoSetUp());
+				Thread.ofPlatform().daemon(false).start(() -> AutoFarm.autoSetUp());
 			}
 		});
 	}
