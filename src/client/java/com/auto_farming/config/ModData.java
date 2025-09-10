@@ -7,8 +7,8 @@ import com.auto_farming.farmprofiles.Profile;
 
 public class ModData {
     private Profile currentProfile = Profile.NETHERWART;
-    private boolean showPauseMessage = true;
-    private boolean forceAttentiveMood = false;
+    private Boolean showPauseMessage = true;
+    private Boolean forceAttentiveMood = false;
 
     public void setCurrentProfile(Profile current_profile) {
         if (AutofarmingClient.autoFarm != null && AutofarmingClient.autoFarm.isActive) {
@@ -17,7 +17,6 @@ public class ModData {
         }
 
         this.currentProfile = current_profile;
-        SaveDataLoader.save(this);
     }
 
     public Profile getCurrentProfile() {
@@ -26,19 +25,17 @@ public class ModData {
 
     public void setShowPauseMessage(boolean showPauseMessage) {
         this.showPauseMessage = showPauseMessage;
-        SaveDataLoader.save(this);
     }
 
-    public boolean showPauseMessage() {
+    public boolean isShowPauseMessage() {
         return showPauseMessage;
     }
 
     public void setForceAttentiveMood(boolean forceAttentiveMood) {
         this.forceAttentiveMood = forceAttentiveMood;
-        SaveDataLoader.save(this);
     }
 
-    public boolean forceAttentiveMood() {
+    public boolean isForceAttentiveMood() {
         return forceAttentiveMood;
     }
 }

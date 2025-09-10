@@ -42,8 +42,8 @@ public class AutoFarm {
     private long startTime = 0L;
     private long interval_1 = 0L;
 
-    public AutoFarm(ModData currentMoData){
-        this.currentModData=currentMoData;
+    public AutoFarm(ModData currentMoData) {
+        this.currentModData = currentMoData;
     }
 
     public boolean isActive() {
@@ -165,7 +165,8 @@ public class AutoFarm {
             }
 
             double progress = ((double) elapsedTime / totalTime) * 100;
-            setHudMessage(currentModData.getCurrentProfile().NAME + "\nRow progress: " + Math.round(progress) + "%\nCurrent mood: "
+            setHudMessage(currentModData.getCurrentProfile().NAME + "\nRow progress: " + Math.round(progress)
+                    + "%\nCurrent mood: "
                     + currentMood.NAME + "\nRow time: " + getTimeStringFromMillis(totalTime) + "\nElapsed row time: "
                     + getTimeStringFromMillis(elapsedTime) + "\nMood Time: "
                     + getTimeStringFromMillis(currentMoodDuration) + " \nMood overshoot: "
@@ -221,7 +222,7 @@ public class AutoFarm {
         long pauseStart = System.currentTimeMillis();
 
         while (isActive && isPaused) {
-            if (currentModData.showPauseMessage())
+            if (currentModData.isShowPauseMessage())
                 setHudMessage("PAUSED - Press " + PAUSE_TOGGLE.toString() + " to resume");
 
             try {
@@ -288,7 +289,7 @@ public class AutoFarm {
     private long getMoodClickDelay() {
         long delay = currentMood.CLICK_DELAY;
 
-        if (currentModData.forceAttentiveMood()) {
+        if (currentModData.isForceAttentiveMood()) {
             delay = Mood.ATTENTIVE.CLICK_DELAY;
         }
 
@@ -359,18 +360,20 @@ public class AutoFarm {
     }
 
     private Actions[] getCurrentDirectionActions() {
-        return currentDirection == LEFT ? currentModData.getCurrentProfile().ACTIONS_LEFT : currentModData.getCurrentProfile().ACTIONS_RIGHT;
+        return currentDirection == LEFT ? currentModData.getCurrentProfile().ACTIONS_LEFT
+                : currentModData.getCurrentProfile().ACTIONS_RIGHT;
     }
 
     private long getCurrentRowClearTime() {
-        return currentDirection == LEFT ? currentModData.getCurrentProfile().LEFT_ROW_CLEAR_TIME : currentModData.getCurrentProfile().RIGHT_ROW_CLEAR_TIME;
+        return currentDirection == LEFT ? currentModData.getCurrentProfile().LEFT_ROW_CLEAR_TIME
+                : currentModData.getCurrentProfile().RIGHT_ROW_CLEAR_TIME;
     }
 
     private long getMoodOvershoot() {
 
         long overshoot = 0L;
 
-        if (currentModData.forceAttentiveMood() || currentMood.OVERSHOOT_DURATION == 0)
+        if (currentModData.isForceAttentiveMood() || currentMood.OVERSHOOT_DURATION == 0)
             return overshoot;
 
         long roll = Random(0L, 1L);

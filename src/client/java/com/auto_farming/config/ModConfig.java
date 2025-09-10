@@ -2,6 +2,7 @@ package com.auto_farming.config;
 
 import static com.auto_farming.AutofarmingClient.modData;
 
+import com.auto_farming.AutofarmingClient;
 import com.auto_farming.farmprofiles.Profile;
 
 import me.shedaniel.autoconfig.ConfigData;
@@ -37,16 +38,20 @@ public class ModConfig implements ConfigData {
 				.build());
 
 		general.addEntry(entryBuilder
-				.startBooleanToggle(Text.of("Show Pause Message"), modData.showPauseMessage())
+				.startBooleanToggle(Text.of("Show Pause Message"), modData.isShowPauseMessage())
 				.setDefaultValue(true)
 				.setSaveConsumer(newValue -> modData.setShowPauseMessage(newValue))
 				.build());
 
 		general.addEntry(entryBuilder
-				.startBooleanToggle(Text.of("Force Attentive Mood"), modData.forceAttentiveMood())
+				.startBooleanToggle(Text.of("Force Attentive Mood"), modData.isForceAttentiveMood())
 				.setDefaultValue(false)
 				.setSaveConsumer(newValue -> modData.setForceAttentiveMood(newValue))
 				.build());
+
+		builder.setSavingRunnable(()->{
+			SaveDataLoader.save(AutofarmingClient.modData);
+		});
 
 		return builder.build();
 	}
