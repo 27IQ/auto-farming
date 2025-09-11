@@ -27,7 +27,7 @@ public class Commands {
     }
 
     public static void warpGarden() {
-        sendMessageToServer("/garden");
+        sendMessageToServer("/warp garden");
     }
 
     private static void sendMessageToServer(String message) {
