@@ -25,28 +25,26 @@ public class ModConfig implements ConfigData {
 		ConfigEntryBuilder entryBuilder = builder.entryBuilder();
 
 		general.addEntry(entryBuilder
-				.startEnumSelector(Text.of("Profile"), Profile.class, modData.getCurrentProfile())
-				.setDefaultValue(Profile.NETHERWART)
-				.setEnumNameProvider((profile) -> {
-					return Text.of(profile.toString());
-				})
-				.setSaveConsumer(newValue -> modData.setCurrentProfile(newValue))
+				.startSelector(Text.of("Profile"), modData.getProfiles().toArray(new Profile[0]),
+						modData.getCurrentProfile())
+				.setDefaultValue(modData.getCurrentProfile())
+				.setSaveConsumer(modData::setCurrentProfile)
 				.build());
 
 		general.addEntry(entryBuilder
-				.startTextDescription(Text.of("Current profile" + modData.getCurrentProfile().NAME))
+				.startTextDescription(Text.of("Current profile" + modData.getCurrentProfile().name))
 				.build());
 
 		general.addEntry(entryBuilder
 				.startBooleanToggle(Text.of("Show Pause Message"), modData.isShowPauseMessage())
 				.setDefaultValue(true)
-				.setSaveConsumer(newValue -> modData.setShowPauseMessage(newValue))
+				.setSaveConsumer(modData::setShowPauseMessage)
 				.build());
 
 		general.addEntry(entryBuilder
 				.startBooleanToggle(Text.of("Force Attentive Mood"), modData.isForceAttentiveMood())
 				.setDefaultValue(false)
-				.setSaveConsumer(newValue -> modData.setForceAttentiveMood(newValue))
+				.setSaveConsumer(modData::setForceAttentiveMood)
 				.build());
 
 		builder.setSavingRunnable(() -> {

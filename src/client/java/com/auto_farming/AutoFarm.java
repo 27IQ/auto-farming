@@ -93,13 +93,13 @@ public class AutoFarm {
 
             currentDirection = direction;
 
-            for (int i = 0; i < currentModData.getCurrentProfile().LAYER_COUNT; i++) {
+            for (int i = 0; i < currentModData.getCurrentProfile().layerCount; i++) {
                 clearRow();
 
                 if (!isActive)
                     break;
 
-                if (currentModData.getCurrentProfile().LAYER_SWAP_TIME != 0)
+                if (currentModData.getCurrentProfile().layerSwapTime != 0)
                     layer_swap();
 
                 toggle_direction();
@@ -165,7 +165,7 @@ public class AutoFarm {
             }
 
             double progress = ((double) elapsedTime / totalTime) * 100;
-            setHudMessage(currentModData.getCurrentProfile().NAME + "\nRow progress: " + Math.round(progress)
+            setHudMessage(currentModData.getCurrentProfile().name + "\nRow progress: " + Math.round(progress)
                     + "%\nCurrent mood: "
                     + currentMood.NAME + "\nRow time: " + getTimeStringFromMillis(totalTime) + "\nElapsed row time: "
                     + getTimeStringFromMillis(elapsedTime) + "\nMood Time: "
@@ -193,12 +193,12 @@ public class AutoFarm {
     private void handleVoidDrop() {
 
         if (debugging)
-            walkedTime += currentModData.getCurrentProfile().VOID_DROP_TIME;
+            walkedTime += currentModData.getCurrentProfile().voidDropTime;
 
         long elapsedVoid = 0L;
 
-        while (elapsedVoid < currentModData.getCurrentProfile().VOID_DROP_TIME && isActive) {
-            long remaining_void = currentModData.getCurrentProfile().VOID_DROP_TIME - elapsedVoid;
+        while (elapsedVoid < currentModData.getCurrentProfile().voidDropTime && isActive) {
+            long remaining_void = currentModData.getCurrentProfile().voidDropTime - elapsedVoid;
             long sleep_chunk = Math.min(pollingInterval, remaining_void);
 
             try {
@@ -209,7 +209,7 @@ public class AutoFarm {
 
             elapsedVoid += sleep_chunk;
 
-            double progress = ((double) elapsedVoid / currentModData.getCurrentProfile().VOID_DROP_TIME) * 100;
+            double progress = ((double) elapsedVoid / currentModData.getCurrentProfile().voidDropTime) * 100;
             setHudMessage("Void drop: " + Math.round(progress) + "%");
 
             if (isPaused) {
@@ -335,7 +335,7 @@ public class AutoFarm {
 
     private void layer_swap() {
 
-        Actions[] actions = currentModData.getCurrentProfile().ACTIONS_LAYER_SWAP;
+        Actions[] actions = currentModData.getCurrentProfile().actionsLayerSwap;
 
         Long[] deviation = getClickDeviation(actions.length * 2);
 
@@ -345,9 +345,9 @@ public class AutoFarm {
         }
 
         if (debugging)
-            walkedTime += currentModData.getCurrentProfile().LAYER_SWAP_TIME;
+            walkedTime += currentModData.getCurrentProfile().layerSwapTime;
 
-        preciseSleep(currentModData.getCurrentProfile().LAYER_SWAP_TIME);
+        preciseSleep(currentModData.getCurrentProfile().layerSwapTime);
 
         for (int i = 0; i < actions.length; i++) {
             deactivateCurrentActions();
@@ -360,13 +360,13 @@ public class AutoFarm {
     }
 
     private Actions[] getCurrentDirectionActions() {
-        return currentDirection == LEFT ? currentModData.getCurrentProfile().ACTIONS_LEFT
-                : currentModData.getCurrentProfile().ACTIONS_RIGHT;
+        return currentDirection == LEFT ? currentModData.getCurrentProfile().actionsLeft
+                : currentModData.getCurrentProfile().actionsRight;
     }
 
     private long getCurrentRowClearTime() {
-        return currentDirection == LEFT ? currentModData.getCurrentProfile().LEFT_ROW_CLEAR_TIME
-                : currentModData.getCurrentProfile().RIGHT_ROW_CLEAR_TIME;
+        return currentDirection == LEFT ? currentModData.getCurrentProfile().leftRowClearTime
+                : currentModData.getCurrentProfile().rightRowClearTime;
     }
 
     private long getMoodOvershoot() {
