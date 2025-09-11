@@ -13,6 +13,7 @@ import static com.auto_farming.actionwrapper.Actions.WALK_LEFT;
 import static com.auto_farming.actionwrapper.Actions.WALK_RIGHT;
 import static com.auto_farming.actionwrapper.Actions.WALK_FORWARD;
 import com.auto_farming.farmprofiles.Profile;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class ModData {
     private List<Profile> profiles = Arrays.asList(new Profile[] {
@@ -22,10 +23,10 @@ public class ModData {
                     new Actions[] { WALK_FORWARD, WALK_LEFT }, new Actions[] { WALK_RIGHT }, new Actions[] {})
     });
 
-    private List<Profile> profilesToDelete=new ArrayList<>();
-    private List<Profile> profilesToAdd=new ArrayList<>();
+    @JsonIgnore
+    public boolean reload = false;
 
-    private Profile currentProfile = profiles.get(0);
+    private Integer currentProfileIndex = 0;
     private Boolean showPauseMessage = true;
     private Boolean forceAttentiveMood = false;
 
@@ -34,20 +35,35 @@ public class ModData {
     }
 
     public List<Profile> getProfiles() {
-        return profiles;
+        return new ArrayList<>(profiles);
     }
 
+    public void setCurrentProfileIndex(Integer profileIndex) {
+        if (AutofarmingClient.autoFarm != null && AutofarmingClient.autoFarm.isActive) {
+            setAlertMessage("please deactivate the running profile first");
+            return;
+        }
+
+        this.currentProfileIndex = profileIndex;
+    }
+
+    public Integer getCurrentProfileIndex() {
+        return currentProfileIndex;
+    }
+
+    @JsonIgnore
     public void setCurrentProfile(Profile current_profile) {
         if (AutofarmingClient.autoFarm != null && AutofarmingClient.autoFarm.isActive) {
             setAlertMessage("please deactivate the running profile first");
             return;
         }
 
-        this.currentProfile = current_profile;
+        this.currentProfileIndex = profiles.indexOf(current_profile);
     }
 
+    @JsonIgnore
     public Profile getCurrentProfile() {
-        return currentProfile;
+        return profiles.get(currentProfileIndex);
     }
 
     public void setShowPauseMessage(boolean showPauseMessage) {
@@ -64,20 +80,5 @@ public class ModData {
 
     public boolean isForceAttentiveMood() {
         return forceAttentiveMood;
-    }
-
-    public void flagProfileForDeletion(Profile profile){
-        profilesToDelete.add(profile);
-    }
-
-    public void flagProfileForAddition(Profile profile){
-        profilesToAdd.add(profile);
-    }
-
-    public void applyProfiles(){
-        List<Profile> copy=new ArrayList<>(profiles);
-        copy.removeAll(profilesToDelete);
-        copy.addAll(profilesToAdd);
-        profiles=copy;
     }
 }

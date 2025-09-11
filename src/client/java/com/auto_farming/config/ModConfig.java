@@ -1,5 +1,7 @@
 package com.auto_farming.config;
 
+import java.util.List;
+
 import com.auto_farming.config.clothconfigextensions.ButtonEntry;
 import com.auto_farming.config.clothconfigextensions.WideStringListEntry;
 import com.auto_farming.farmprofiles.Profile;
@@ -9,6 +11,7 @@ import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 
@@ -16,10 +19,15 @@ import net.minecraft.text.Text;
 public class ModConfig implements ConfigData {
 
 	public static Profile currentNewProfile = new Profile();
+	public static ModData modData = SaveDataLoader.load();
 
 	public static Screen build(Screen parent) {
 
-		ModData modData = SaveDataLoader.load();
+		if (!modData.reload) {
+			modData = SaveDataLoader.load();
+		} else {
+			modData.reload = false;
+		}
 
 		ConfigBuilder builder = ConfigBuilder.create()
 				.setParentScreen(parent)
@@ -58,29 +66,30 @@ public class ModConfig implements ConfigData {
 		for (Profile profile : modData.getProfiles()) {
 			general.addEntry(profile.getNameLabel(entryBuilder));
 			general.addEntry(profile.getSettingTextField(entryBuilder));
-			general.addEntry(profile.getDeleteButton(entryBuilder, modData));
+			general.addEntry(profile.getDeleteButton(entryBuilder, modData, parent));
 		}
 
 		general.addEntry(entryBuilder
 				.startTextDescription(Text.of("New Profile"))
 				.build());
 
-		general.addEntry(new WideStringListEntry(
-				Profile.EMPTY_JSON_PROFILE_STRING,
-				() -> Profile.EMPTY_JSON_PROFILE_STRING,
-				jsonString -> {
-					currentNewProfile.setJsonString(jsonString);
-				}));
-
 		general.addEntry(new ButtonEntry(Text.literal("Add Profile"), (() -> {
-			modData.flagProfileForAddition(currentNewProfile);
+			List<Profile> profiles = modData.getProfiles();
+			profiles.add(new Profile(Profile.EMPTY_JSON_PROFILE_STRING));
+			modData.setProfiles(profiles);
+			reload(parent);
 		})));
 
 		builder.setSavingRunnable(() -> {
-			modData.applyProfiles();
-			SaveDataLoader.save(modData);
+			if (!modData.reload)
+				SaveDataLoader.save(modData);
 		});
 
 		return builder.build();
+	}
+
+	public static void reload(Screen parent) {
+		modData.reload = true;
+		MinecraftClient.getInstance().setScreen(build(parent));
 	}
 }
