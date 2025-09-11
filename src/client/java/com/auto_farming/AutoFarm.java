@@ -28,19 +28,17 @@ public class AutoFarm {
     private boolean isPaused = false;
     private Directions currentDirection = NONE;
     // settings
-    private long pollingInterval = 100L;
-    // not yet implemented
-    // private boolean pause_protection= true;
+    private final long POLLING_INTERVAL = 100;
     // moods
     private Mood currentMood = getNextMood();
-    private long currentMoodDuration = 0L;
+    private long currentMoodDuration = 0;
     // debugging
     private boolean debugging = false;
-    private long addedTime = 0L;
-    private long walkedTime = 0L;
-    private long pausedTime = 0L;
-    private long startTime = 0L;
-    private long interval_1 = 0L;
+    private long addedTime = 0;
+    private long walkedTime = 0;
+    private long pausedTime = 0;
+    private long startTime = 0;
+    private long interval_1 = 0;
 
     public AutoFarm(ModData currentMoData) {
         this.currentModData = currentMoData;
@@ -80,9 +78,9 @@ public class AutoFarm {
 
         if (debugging) {
             startTime = System.currentTimeMillis();
-            addedTime = 0L;
-            walkedTime = 0L;
-            pausedTime = 0L;
+            addedTime = 0;
+            walkedTime = 0;
+            pausedTime = 0;
         }
 
         isActive = true;
@@ -131,12 +129,12 @@ public class AutoFarm {
 
         activateCurrentActions();
 
-        long elapsedTime = 0L;
+        long elapsedTime = 0;
 
         while (elapsedTime < totalTime && isActive) {
 
             long remainingTime = totalTime - elapsedTime;
-            long sleepChunk = Math.min(pollingInterval, remainingTime);
+            long sleepChunk = Math.min(POLLING_INTERVAL, remainingTime);
 
             rowPause();
 
@@ -195,11 +193,11 @@ public class AutoFarm {
         if (debugging)
             walkedTime += currentModData.getCurrentProfile().voidDropTime;
 
-        long elapsedVoid = 0L;
+        long elapsedVoid = 0;
 
         while (elapsedVoid < currentModData.getCurrentProfile().voidDropTime && isActive) {
             long remaining_void = currentModData.getCurrentProfile().voidDropTime - elapsedVoid;
-            long sleep_chunk = Math.min(pollingInterval, remaining_void);
+            long sleep_chunk = Math.min(POLLING_INTERVAL, remaining_void);
 
             try {
                 Thread.sleep(sleep_chunk);
@@ -226,13 +224,13 @@ public class AutoFarm {
                 setHudMessage("PAUSED - Press " + PAUSE_TOGGLE.toString() + " to resume");
 
             try {
-                Thread.sleep(pollingInterval);
+                Thread.sleep(POLLING_INTERVAL);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
             if (debugging)
-                pausedTime += pollingInterval;
+                pausedTime += POLLING_INTERVAL;
         }
 
         if (debugging) {
@@ -246,7 +244,7 @@ public class AutoFarm {
         boolean miss = getClickDelayMiss();
         Actions[] currentActionOrder = getCurrentActionOrder();
 
-        preciseSleep(10L);
+        preciseSleep(10);
         LEFT_CLICK.activate();
         preciseSleep((miss ? 0 : 500) + deviation[0]);
 
@@ -260,7 +258,7 @@ public class AutoFarm {
         Long[] deviation = getClickDeviation(getCurrentDirectionActions().length);
         Actions[] currentActionOrder = getCurrentActionOrder();
 
-        preciseSleep(10L);
+        preciseSleep(10);
 
         for (int i = 0; i < deviation.length - 1; i++) {
             currentActionOrder[i].deactivate();
@@ -280,7 +278,7 @@ public class AutoFarm {
         result.add(rand + moodClickDelay);
 
         for (int i = 0; i < count; i++) {
-            result.add(Random(0L, 70L));
+            result.add((long)Random(0, 70));
         }
 
         return result.toArray(new Long[0]);
@@ -328,7 +326,7 @@ public class AutoFarm {
 
     private boolean getClickDelayMiss() {
 
-        long pull = Random(0L, 1L);
+        long pull = Random(0, 1);
 
         return pull == 1 ? true : false;
     }
@@ -371,12 +369,12 @@ public class AutoFarm {
 
     private long getMoodOvershoot() {
 
-        long overshoot = 0L;
+        long overshoot = 0;
 
         if (currentModData.isForceAttentiveMood() || currentMood.OVERSHOOT_DURATION == 0)
             return overshoot;
 
-        long roll = Random(0L, 1L);
+        long roll = Random(0, 1);
 
         if (currentMood.OVERSHOOT_CHANCE <= roll) {
             long minDur = currentMood.OVERSHOOT_DURATION - currentMood.OVERSHOOT_DURATION_VARIABLE;
@@ -401,7 +399,7 @@ public class AutoFarm {
             chances.add(mood.MOOD_CHANCE);
         }
 
-        double currentThreshold = 0.0;
+        double currentThreshold = 0;
         int roll = Random(0, 1);
 
         int selectedMoodIndex = 0;
@@ -419,7 +417,7 @@ public class AutoFarm {
 
     private static void preciseSleep(long ms) {
         long start = System.nanoTime();
-        long end = start + ms * 1_000_000L;
+        long end = start + ms * 1_000_000;
 
         if (ms > 20) {
             try {
