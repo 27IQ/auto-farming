@@ -12,10 +12,14 @@ import net.minecraft.client.gui.Element;
 
 public class ButtonEntry extends AbstractConfigListEntry<Void> {
     private final ButtonWidget button;
+    private boolean dirty = false;
 
     public ButtonEntry(Text label, Runnable onPress) {
         super(label, false);
-        this.button = ButtonWidget.builder(label, b -> onPress.run())
+        this.button = ButtonWidget.builder(label, b -> {
+            onPress.run();
+            dirty = true;
+        })
                 .dimensions(0, 0, 100, 20).build();
     }
 
@@ -41,6 +45,11 @@ public class ButtonEntry extends AbstractConfigListEntry<Void> {
     @Override
     public Optional<Void> getDefaultValue() {
         throw new UnsupportedOperationException("Unimplemented method 'getDefaultValue'");
+    }
+
+    @Override
+    public boolean isEdited() {
+        return dirty;
     }
 
     @Override

@@ -3,7 +3,7 @@ package com.auto_farming.config;
 import java.util.List;
 
 import com.auto_farming.config.clothconfigextensions.ButtonEntry;
-import com.auto_farming.config.clothconfigextensions.WideStringListEntry;
+import com.auto_farming.config.clothconfigextensions.DirtyFlag;
 import com.auto_farming.farmprofiles.Profile;
 
 import me.shedaniel.autoconfig.ConfigData;
@@ -20,13 +20,16 @@ public class ModConfig implements ConfigData {
 
 	public static Profile currentNewProfile = new Profile();
 	public static ModData modData = SaveDataLoader.load();
+	private static boolean hasReloaded=false;
 
 	public static Screen build(Screen parent) {
 
 		if (!modData.reload) {
 			modData = SaveDataLoader.load();
+			hasReloaded=false;
 		} else {
 			modData.reload = false;
+			hasReloaded=true;
 		}
 
 		ConfigBuilder builder = ConfigBuilder.create()
@@ -79,6 +82,8 @@ public class ModConfig implements ConfigData {
 			modData.setProfiles(profiles);
 			reload(parent);
 		})));
+
+		general.addEntry(new DirtyFlag(hasReloaded));
 
 		builder.setSavingRunnable(() -> {
 			if (!modData.reload)

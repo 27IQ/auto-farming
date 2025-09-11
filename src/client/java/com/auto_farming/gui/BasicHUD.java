@@ -11,7 +11,6 @@ public class BasicHUD {
         BasicHUD.hudMessage = hudMessage;
     }
 
-    @SuppressWarnings("deprecation")
     public static void registerHUD() {
         HudRenderCallback.EVENT.register((drawContext, tickDelta) -> {
             MinecraftClient client = MinecraftClient.getInstance();
