@@ -1,7 +1,5 @@
 package com.auto_farming.config;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.auto_farming.config.clothconfigextensions.ButtonEntry;
 import com.auto_farming.config.clothconfigextensions.WideStringListEntry;
 import com.auto_farming.farmprofiles.Profile;
@@ -11,18 +9,17 @@ import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
-import me.shedaniel.clothconfig2.gui.entries.StringListListEntry;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 
 @Config(name = "auto-farming")
 public class ModConfig implements ConfigData {
 
-	public static Profile currentNewProfile=new Profile();
+	public static Profile currentNewProfile = new Profile();
 
 	public static Screen build(Screen parent) {
 
-		ModData modData=SaveDataLoader.load();
+		ModData modData = SaveDataLoader.load();
 
 		ConfigBuilder builder = ConfigBuilder.create()
 				.setParentScreen(parent)
@@ -54,7 +51,6 @@ public class ModConfig implements ConfigData {
 				.setSaveConsumer(modData::setForceAttentiveMood)
 				.build());
 
-
 		general.addEntry(entryBuilder
 				.startTextDescription(Text.of("Profiles:"))
 				.build());
@@ -62,7 +58,7 @@ public class ModConfig implements ConfigData {
 		for (Profile profile : modData.getProfiles()) {
 			general.addEntry(profile.getNameLabel(entryBuilder));
 			general.addEntry(profile.getSettingTextField(entryBuilder));
-			general.addEntry(profile.getDeleteButton(entryBuilder,modData));
+			general.addEntry(profile.getDeleteButton(entryBuilder, modData));
 		}
 
 		general.addEntry(entryBuilder
@@ -70,13 +66,15 @@ public class ModConfig implements ConfigData {
 				.build());
 
 		general.addEntry(new WideStringListEntry(
-				Profile.EMPTY_JSON_PROFILE_STRING, 
-				()->Profile.EMPTY_JSON_PROFILE_STRING, 
+				Profile.EMPTY_JSON_PROFILE_STRING,
+				() -> Profile.EMPTY_JSON_PROFILE_STRING,
 				jsonString -> {
 					currentNewProfile.setJsonString(jsonString);
 				}));
 
-		general.addEntry(new ButtonEntry(Text.literal("Add Profile"), (()->{modData.flagProfileForAddition(currentNewProfile);})));
+		general.addEntry(new ButtonEntry(Text.literal("Add Profile"), (() -> {
+			modData.flagProfileForAddition(currentNewProfile);
+		})));
 
 		builder.setSavingRunnable(() -> {
 			modData.applyProfiles();
