@@ -2,6 +2,7 @@ package com.auto_farming.config;
 
 import static com.auto_farming.gui.Alert.setAlertMessage;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,6 +21,10 @@ public class ModData {
             new Profile("5x4 Mushroom @ 126 (-25|0)", 92000, 97000, 3500, 0, 4,
                     new Actions[] { WALK_FORWARD, WALK_LEFT }, new Actions[] { WALK_RIGHT }, new Actions[] {})
     });
+
+    private List<Profile> profilesToDelete=new ArrayList<>();
+    private List<Profile> profilesToAdd=new ArrayList<>();
+
     private Profile currentProfile = profiles.get(0);
     private Boolean showPauseMessage = true;
     private Boolean forceAttentiveMood = false;
@@ -59,5 +64,20 @@ public class ModData {
 
     public boolean isForceAttentiveMood() {
         return forceAttentiveMood;
+    }
+
+    public void flagProfileForDeletion(Profile profile){
+        profilesToDelete.add(profile);
+    }
+
+    public void flagProfileForAddition(Profile profile){
+        profilesToAdd.add(profile);
+    }
+
+    public void applyProfiles(){
+        List<Profile> copy=new ArrayList<>(profiles);
+        copy.removeAll(profilesToDelete);
+        copy.addAll(profilesToAdd);
+        profiles=copy;
     }
 }

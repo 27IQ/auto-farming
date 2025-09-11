@@ -22,13 +22,11 @@ public class AutofarmingClient implements ClientModInitializer {
 
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-	public static volatile ModData modData;
 	public static volatile AutoFarm autoFarm;
 
 	@Override
 	public void onInitializeClient() {
 
-		modData=SaveDataLoader.load();
 
 		Actions.initActions();
 		BasicHUD.registerHUD();
@@ -41,7 +39,7 @@ public class AutofarmingClient implements ClientModInitializer {
 	}
 
 	public static AutoFarm getNewAutofarmInstance(){
-		autoFarm=new AutoFarm(modData);
+		autoFarm=new AutoFarm(SaveDataLoader.load());
 		return autoFarm;
 	}
 }
