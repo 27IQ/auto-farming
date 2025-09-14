@@ -2,6 +2,7 @@ package com.auto_farming.config;
 
 import java.util.List;
 
+import com.auto_farming.AutofarmingClient;
 import com.auto_farming.config.clothconfigextensions.ButtonEntry;
 import com.auto_farming.config.clothconfigextensions.DirtyFlag;
 import com.auto_farming.farmprofiles.Profile;
@@ -19,17 +20,17 @@ import net.minecraft.text.Text;
 public class ModConfig implements ConfigData {
 
 	public static Profile currentNewProfile = new Profile();
-	public static ModData modData = SaveDataLoader.load();
-	private static boolean hasReloaded=false;
+	public static ModData modData = AutofarmingClient.modData.clone();
+	private static boolean hasReloaded = false;
 
 	public static Screen build(Screen parent) {
 
 		if (!modData.reload) {
 			modData = SaveDataLoader.load();
-			hasReloaded=false;
+			hasReloaded = false;
 		} else {
 			modData.reload = false;
-			hasReloaded=true;
+			hasReloaded = true;
 		}
 
 		ConfigBuilder builder = ConfigBuilder.create()
@@ -60,6 +61,12 @@ public class ModConfig implements ConfigData {
 				.startBooleanToggle(Text.of("Force Attentive Mood"), modData.isForceAttentiveMood())
 				.setDefaultValue(false)
 				.setSaveConsumer(modData::setForceAttentiveMood)
+				.build());
+
+		general.addEntry(entryBuilder
+				.startBooleanToggle(Text.of("Enable Distracted Mood"), modData.getEnableDistracted())
+				.setDefaultValue(false)
+				.setSaveConsumer(modData::setEnableDistracted)
 				.build());
 
 		general.addEntry(entryBuilder

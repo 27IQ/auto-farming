@@ -19,7 +19,7 @@ import me.shedaniel.clothconfig2.gui.entries.TextListEntry;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 
-public class Profile {
+public class Profile implements Cloneable {
     public Profile() {
     }
 
@@ -167,4 +167,28 @@ public class Profile {
     public String toString() {
         return this.name;
     }
+
+    @Override
+    public Profile clone() {
+        Profile clonedProfile = new Profile(
+                name,
+                leftRowClearTime,
+                rightRowClearTime,
+                voidDropTime,
+                layerSwapTime,
+                layerCount,
+                cloneActions(actionsLeft),
+                cloneActions(actionsRight),
+                cloneActions(actionsLayerSwap));
+
+        return clonedProfile;
+    }
+
+    private Actions[] cloneActions(Actions[] actions) {
+        if (actions == null)
+            return new Actions[0];
+
+        return actions.clone();
+    }
+
 }

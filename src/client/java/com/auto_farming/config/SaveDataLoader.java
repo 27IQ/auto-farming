@@ -50,6 +50,7 @@ public class SaveDataLoader {
         }
 
         data.init();
+        AutofarmingClient.modData = data;
         return data;
     }
 
@@ -73,6 +74,8 @@ public class SaveDataLoader {
             AutofarmingClient.LOGGER.error(e.getMessage(), e);
             return;
         }
+
+        AutofarmingClient.modData = data;
     }
 
     private static String readFromInputStream(InputStream inputStream) throws IOException {

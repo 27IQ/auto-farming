@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import com.auto_farming.actionwrapper.Actions;
 import com.auto_farming.chat.Commands;
 import com.auto_farming.config.ModConfig;
+import com.auto_farming.config.ModData;
 import com.auto_farming.config.SaveDataLoader;
 import com.auto_farming.gui.BasicHUD;
 import com.auto_farming.input.InputHandler;
@@ -22,9 +23,12 @@ public class AutofarmingClient implements ClientModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	public static volatile AutoFarm autoFarm;
+	public static volatile ModData modData;
 
 	@Override
 	public void onInitializeClient() {
+
+		SaveDataLoader.load();
 
 		Actions.initActions();
 		BasicHUD.registerHUD();
@@ -37,7 +41,7 @@ public class AutofarmingClient implements ClientModInitializer {
 	}
 
 	public static AutoFarm getNewAutofarmInstance() {
-		autoFarm = new AutoFarm(SaveDataLoader.load());
+		autoFarm = new AutoFarm();
 		return autoFarm;
 	}
 }

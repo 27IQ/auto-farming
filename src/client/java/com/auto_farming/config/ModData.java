@@ -15,7 +15,7 @@ import static com.auto_farming.actionwrapper.Actions.WALK_FORWARD;
 import com.auto_farming.farmprofiles.Profile;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class ModData {
+public class ModData implements Cloneable {
     private List<Profile> profiles = Arrays.asList(new Profile[] {
             new Profile("5x5 Nether Warts @ 116 (0|0)", 96000, 96000, 3500, 0, 5, new Actions[] { WALK_LEFT },
                     new Actions[] { WALK_RIGHT }, new Actions[] {}),
@@ -25,12 +25,11 @@ public class ModData {
 
     @JsonIgnore
     public boolean reload = false;
-    @JsonIgnore
-    public boolean first = true;
 
     private Profile currentProfile = null;
     private Boolean showPauseMessage = true;
     private Boolean forceAttentiveMood = false;
+    private Boolean enableDistracted = false;
 
     public void init() {
         AutofarmingClient.LOGGER.info("initialising moddata");
@@ -102,5 +101,29 @@ public class ModData {
 
     public boolean isForceAttentiveMood() {
         return forceAttentiveMood;
+    }
+
+    public void setEnableDistracted(Boolean enableDistracted) {
+        this.enableDistracted = enableDistracted;
+    }
+
+    public Boolean getEnableDistracted() {
+        return enableDistracted;
+    }
+
+    @Override
+    public ModData clone() {
+        ModData clonedModData = new ModData();
+        clonedModData.reload = this.reload;
+        if (currentProfile == null) {
+            clonedModData.currentProfile = null;
+        } else {
+            clonedModData.currentProfile = this.currentProfile.clone();
+        }
+        clonedModData.showPauseMessage = this.showPauseMessage;
+        clonedModData.forceAttentiveMood = this.forceAttentiveMood;
+        clonedModData.enableDistracted = this.enableDistracted;
+
+        return clonedModData;
     }
 }
