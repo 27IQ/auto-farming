@@ -28,7 +28,10 @@ public class SaveDataLoader {
             configString = readFromInputStream(new FileInputStream(autoFarmingConfigPath.toFile()));
         } catch (IOException e) {
             AutofarmingClient.LOGGER.error(e.getMessage(), e);
-            return new ModData();
+            ModData modData=new ModData();
+            modData.init();
+            save(modData);
+            return modData;
         }
 
         AutofarmingClient.LOGGER.info("loading: " + configString);
@@ -40,9 +43,13 @@ public class SaveDataLoader {
             data = objectMapper.readValue(configString, ModData.class);
         } catch (JsonProcessingException e) {
             AutofarmingClient.LOGGER.error(e.getMessage(), e);
-            return new ModData();
+            ModData modData=new ModData();
+            modData.init();
+            save(modData);
+            return modData;
         }
 
+        data.init();
         return data;
     }
 

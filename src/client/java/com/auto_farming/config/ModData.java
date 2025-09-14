@@ -25,10 +25,44 @@ public class ModData {
 
     @JsonIgnore
     public boolean reload = false;
+    @JsonIgnore
+    public boolean first = true;
 
-    private Integer currentProfileIndex = 0;
+    private Profile currentProfile = null;
     private Boolean showPauseMessage = true;
     private Boolean forceAttentiveMood = false;
+
+    public void init(){
+        AutofarmingClient.LOGGER.info("initialising moddata");
+        if(currentProfile==null&&profiles.size()==0){
+            currentProfile=new Profile(Profile.EMPTY_JSON_PROFILE_STRING);
+            return;
+        }
+
+        if(currentProfile==null&&profiles.size()>0){
+            currentProfile=profiles.get(0);
+            return;
+        }
+
+        int goodprofileInstance=-1;
+
+        for(int i=0;i<profiles.size();i++){
+            if(currentProfile.equals(profiles.get(i)))
+                goodprofileInstance=i;
+        }
+
+        if(goodprofileInstance==-1&&profiles.size()==0){
+            new Profile(Profile.EMPTY_JSON_PROFILE_STRING);
+            return;
+        }
+        
+        if(goodprofileInstance==-1&&profiles.size()!=0){
+            currentProfile=profiles.get(0);
+            return;
+        }
+
+        currentProfile=profiles.get(goodprofileInstance);
+    }
 
     public void setProfiles(List<Profile> profiles) {
         this.profiles = profiles;
@@ -38,32 +72,20 @@ public class ModData {
         return new ArrayList<>(profiles);
     }
 
-    public void setCurrentProfileIndex(Integer profileIndex) {
-        if (AutofarmingClient.autoFarm != null && AutofarmingClient.autoFarm.isActive) {
-            setAlertMessage("please deactivate the running profile first");
-            return;
-        }
-
-        this.currentProfileIndex = profileIndex;
-    }
-
-    public Integer getCurrentProfileIndex() {
-        return currentProfileIndex;
-    }
-
-    @JsonIgnore
     public void setCurrentProfile(Profile current_profile) {
         if (AutofarmingClient.autoFarm != null && AutofarmingClient.autoFarm.isActive) {
             setAlertMessage("please deactivate the running profile first");
             return;
         }
 
-        this.currentProfileIndex = profiles.indexOf(current_profile);
+        this.currentProfile = current_profile;
     }
 
-    @JsonIgnore
     public Profile getCurrentProfile() {
-        return profiles.get(currentProfileIndex);
+        if(profiles.size()==0)
+            return new Profile(Profile.EMPTY_JSON_PROFILE_STRING);
+
+        return currentProfile;
     }
 
     public void setShowPauseMessage(boolean showPauseMessage) {

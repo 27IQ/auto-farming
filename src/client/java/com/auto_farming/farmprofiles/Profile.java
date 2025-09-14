@@ -126,15 +126,31 @@ public class Profile {
             return false;
 
         Profile otherProfile = (Profile) other;
-        return this.name == otherProfile.name &&
+
+        if (!checkActionsEqual(actionsLeft, otherProfile.actionsLeft) &&
+                !checkActionsEqual(actionsRight, otherProfile.actionsRight) &&
+                !checkActionsEqual(actionsLayerSwap, otherProfile.actionsLayerSwap))
+            return false;
+
+        return this.name.equals(otherProfile.name) &&
                 this.leftRowClearTime == otherProfile.leftRowClearTime &&
                 this.rightRowClearTime == otherProfile.rightRowClearTime &&
                 this.voidDropTime == otherProfile.voidDropTime &&
                 this.layerSwapTime == otherProfile.layerSwapTime &&
-                this.layerCount == otherProfile.layerCount &&
-                this.actionsLeft == otherProfile.actionsLeft &&
-                this.actionsRight == otherProfile.actionsRight &&
-                this.actionsLayerSwap == otherProfile.actionsLayerSwap;
+                this.layerCount == otherProfile.layerCount;
+
+    }
+
+    private boolean checkActionsEqual(Actions[] actions, Actions[] otherActions) {
+        if (actions.length != otherActions.length)
+            return false;
+
+        for (int i = 0; i < actions.length; i++) {
+            if (actions[i] != otherActions[i])
+                return false;
+        }
+
+        return true;
     }
 
     @Override
