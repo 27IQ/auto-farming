@@ -32,36 +32,36 @@ public class ModData {
     private Boolean showPauseMessage = true;
     private Boolean forceAttentiveMood = false;
 
-    public void init(){
+    public void init() {
         AutofarmingClient.LOGGER.info("initialising moddata");
-        if(currentProfile==null&&profiles.size()==0){
-            currentProfile=new Profile(Profile.EMPTY_JSON_PROFILE_STRING);
+        if (currentProfile == null && profiles.size() == 0) {
+            currentProfile = new Profile(Profile.EMPTY_JSON_PROFILE_STRING);
             return;
         }
 
-        if(currentProfile==null&&profiles.size()>0){
-            currentProfile=profiles.get(0);
+        if (currentProfile == null && profiles.size() > 0) {
+            currentProfile = profiles.get(0);
             return;
         }
 
-        int goodprofileInstance=-1;
+        int goodprofileInstance = -1;
 
-        for(int i=0;i<profiles.size();i++){
-            if(currentProfile.equals(profiles.get(i)))
-                goodprofileInstance=i;
+        for (int i = 0; i < profiles.size(); i++) {
+            if (currentProfile.equals(profiles.get(i)))
+                goodprofileInstance = i;
         }
 
-        if(goodprofileInstance==-1&&profiles.size()==0){
+        if (goodprofileInstance == -1 && profiles.size() == 0) {
             new Profile(Profile.EMPTY_JSON_PROFILE_STRING);
             return;
         }
-        
-        if(goodprofileInstance==-1&&profiles.size()!=0){
-            currentProfile=profiles.get(0);
+
+        if (goodprofileInstance == -1 && profiles.size() != 0) {
+            currentProfile = profiles.get(0);
             return;
         }
 
-        currentProfile=profiles.get(goodprofileInstance);
+        currentProfile = profiles.get(goodprofileInstance);
     }
 
     public void setProfiles(List<Profile> profiles) {
@@ -82,7 +82,7 @@ public class ModData {
     }
 
     public Profile getCurrentProfile() {
-        if(profiles.size()==0)
+        if (profiles.size() == 0)
             return new Profile(Profile.EMPTY_JSON_PROFILE_STRING);
 
         return currentProfile;

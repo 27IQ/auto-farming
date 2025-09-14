@@ -21,14 +21,14 @@ public class SaveDataLoader {
     private static Path autoFarmingConfigPath = configDir.resolve(AutofarmingClient.MOD_ID + ".json");
 
     public static ModData load() {
-        AutofarmingClient.LOGGER.info("loading from: "+autoFarmingConfigPath.toString());
+        AutofarmingClient.LOGGER.info("loading from: " + autoFarmingConfigPath.toString());
         String configString;
 
         try {
             configString = readFromInputStream(new FileInputStream(autoFarmingConfigPath.toFile()));
         } catch (IOException e) {
             AutofarmingClient.LOGGER.error(e.getMessage(), e);
-            ModData modData=new ModData();
+            ModData modData = new ModData();
             modData.init();
             save(modData);
             return modData;
@@ -43,7 +43,7 @@ public class SaveDataLoader {
             data = objectMapper.readValue(configString, ModData.class);
         } catch (JsonProcessingException e) {
             AutofarmingClient.LOGGER.error(e.getMessage(), e);
-            ModData modData=new ModData();
+            ModData modData = new ModData();
             modData.init();
             save(modData);
             return modData;
@@ -54,7 +54,7 @@ public class SaveDataLoader {
     }
 
     public static void save(ModData data) {
-        AutofarmingClient.LOGGER.info("saving to: "+autoFarmingConfigPath.toString());
+        AutofarmingClient.LOGGER.info("saving to: " + autoFarmingConfigPath.toString());
         ObjectMapper objectMapper = new ObjectMapper();
         String json;
 
