@@ -18,9 +18,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class ModData implements Cloneable {
     private List<Profile> profiles = Arrays.asList(new Profile[] {
             new Profile("5x5 Nether Warts @ 116 (0|0)", 96000, 96000, 3500, 0, 5, new Actions[] { WALK_LEFT },
-                    new Actions[] { WALK_RIGHT }, new Actions[] {}),
-            new Profile("5x4 Mushroom @ 126 (-25|0)", 92000, 97000, 3500, 0, 4,
-                    new Actions[] { WALK_FORWARD, WALK_LEFT }, new Actions[] { WALK_RIGHT }, new Actions[] {})
+                    new Actions[] { WALK_RIGHT }, new Actions[] {}, new Actions[] {}),
+            new Profile("5x4 Mushroom @ 126 (-25|0)", 93500, 97500, 3500, 0, 4,
+                    new Actions[] { WALK_FORWARD, WALK_LEFT }, new Actions[] { WALK_RIGHT }, new Actions[] {},
+                    new Actions[] {})
     });
 
     @JsonIgnore

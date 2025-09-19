@@ -23,10 +23,11 @@ public class Profile implements Cloneable {
     public Profile() {
     }
 
-    public final static String EMPTY_JSON_PROFILE_STRING = "{\"name\":\"\",\"leftRowClearTime\":0,\"rightRowClearTime\":0,\"voidDropTime\":0,\"layerSwapTime\":0,\"layerCount\":0,\"actionsLeft\":[],\"actionsRight\":[],\"actionsLayerSwap\":[]}";
+    public final static String EMPTY_JSON_PROFILE_STRING = "{\"name\":\"\",\"leftRowClearTime\":0,\"rightRowClearTime\":0,\"voidDropTime\":0,\"layerSwapTime\":0,\"layerCount\":0,\"actionsLeft\":[],\"actionsRight\":[],\"actionsLayerSwap\":[],\"actionsStart\":[]}";
 
     public Profile(String name, long leftRowClearTime, long rightRowClearTime, long voidDropTime, long layerSwapTime,
-            int layerCount, Actions[] actionsLeft, Actions[] actionsRight, Actions[] actionsLayerSwap) {
+            int layerCount, Actions[] actionsLeft, Actions[] actionsRight, Actions[] actionsLayerSwap,
+            Actions[] actionsStart) {
         this.name = name;
         this.leftRowClearTime = leftRowClearTime;
         this.rightRowClearTime = rightRowClearTime;
@@ -36,6 +37,7 @@ public class Profile implements Cloneable {
         this.actionsLeft = actionsLeft;
         this.actionsRight = actionsRight;
         this.actionsLayerSwap = actionsLayerSwap;
+        this.actionsStart = actionsStart;
     }
 
     public Profile(String jsonString) {
@@ -51,6 +53,7 @@ public class Profile implements Cloneable {
     public Actions[] actionsLeft;
     public Actions[] actionsRight;
     public Actions[] actionsLayerSwap;
+    public Actions[] actionsStart;
 
     public TextListEntry getNameLabel(ConfigEntryBuilder builder) {
         return builder
@@ -118,6 +121,7 @@ public class Profile implements Cloneable {
         this.actionsLeft = data.actionsLeft;
         this.actionsRight = data.actionsRight;
         this.actionsLayerSwap = data.actionsLayerSwap;
+        this.actionsStart = data.actionsStart;
     }
 
     @Override
@@ -179,7 +183,8 @@ public class Profile implements Cloneable {
                 layerCount,
                 cloneActions(actionsLeft),
                 cloneActions(actionsRight),
-                cloneActions(actionsLayerSwap));
+                cloneActions(actionsLayerSwap),
+                cloneActions(actionsStart));
 
         return clonedProfile;
     }

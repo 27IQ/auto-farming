@@ -37,6 +37,18 @@ public class AutoFarm {
     private long startTime = 0;
     private long interval_1 = 0;
 
+    public void onStart() {
+        isActive = true;
+        isPaused = false;
+        MouseLocker.lockMouse();
+        profileSetUp();
+    }
+
+    public void onClose() {
+        MouseLocker.unlockMouse();
+        setHudMessage("");
+    }
+
     public boolean isActive() {
         return isActive;
     }
@@ -62,6 +74,23 @@ public class AutoFarm {
         SNEAK.activate();
         preciseSleep(Random(500, 1000));
         SNEAK.deactivate();
+        profileSetUp();
+    }
+
+    public static void profileSetUp() {
+        Actions[] setupActions = AutofarmingClient.modData.getCurrentProfile().actionsStart;
+
+        if (setupActions.length == 0)
+            return;
+
+        for (Actions action : setupActions) {
+            preciseSleep(Random(150, 200));
+            action.activate();
+            preciseSleep(Random(450, 550));
+            action.deactivate();
+        }
+
+        preciseSleep(Random(50, 100));
     }
 
     public void runFarm(Directions direction) {
@@ -76,9 +105,7 @@ public class AutoFarm {
             pausedTime = 0;
         }
 
-        isActive = true;
-        isPaused = false;
-        MouseLocker.lockMouse();
+        onStart();
 
         while (isActive) {
 
@@ -97,6 +124,7 @@ public class AutoFarm {
             }
 
             handleVoidDrop();
+            profileSetUp();
 
             if (debugging) {
                 interval_1 = System.currentTimeMillis();
@@ -112,7 +140,7 @@ public class AutoFarm {
             }
         }
 
-        MouseLocker.unlockMouse();
+        onClose();
     }
 
     private void clearRow() {
@@ -165,7 +193,6 @@ public class AutoFarm {
         }
 
         deactivateCurrentActions();
-        setHudMessage("");
     }
 
     private void rowPause() {
@@ -341,7 +368,7 @@ public class AutoFarm {
         preciseSleep(AutofarmingClient.modData.getCurrentProfile().layerSwapTime);
 
         for (int i = 0; i < actions.length; i++) {
-            deactivateCurrentActions();
+            actions[i].deactivate();
             preciseSleep(deviation[actions.length + i]);
         }
     }
