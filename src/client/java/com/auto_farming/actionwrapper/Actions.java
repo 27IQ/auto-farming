@@ -15,19 +15,17 @@ public enum Actions {
     public static boolean first = true;
 
     public static void initActions() {
+
+        MinecraftClient cl = MinecraftClient.getInstance();
+
+        Actions.WALK_FORWARD.keyMapping = cl.options.forwardKey;
+        Actions.WALK_LEFT.keyMapping = cl.options.leftKey;
+        Actions.WALK_BACK.keyMapping = cl.options.backKey;
+        Actions.WALK_RIGHT.keyMapping = cl.options.rightKey;
+        Actions.LEFT_CLICK.keyMapping = cl.options.attackKey;
+        Actions.SNEAK.keyMapping = cl.options.sneakKey;
+
         ClientTickEvents.START_CLIENT_TICK.register(client -> {
-            if (first) {
-                first = false;
-
-                KeyMapping.client = MinecraftClient.getInstance();
-
-                Actions.WALK_FORWARD.keyMapping = KeyMapping.getForwardKey();
-                Actions.WALK_LEFT.keyMapping = KeyMapping.getLeftKey();
-                Actions.WALK_BACK.keyMapping = KeyMapping.getBackKey();
-                Actions.WALK_RIGHT.keyMapping = KeyMapping.getRightKey();
-                Actions.LEFT_CLICK.keyMapping = KeyMapping.getAttackKey();
-                Actions.SNEAK.keyMapping = KeyMapping.getSneakKey();
-            }
 
             if (client == null || client.player == null)
                 return;
@@ -56,5 +54,24 @@ public enum Actions {
         this.active = false;
         this.stop = true;
         AutofarmingClient.LOGGER.info(this.name().toLowerCase() + " deactivated");
+    }
+
+    public static Actions[] cloneOf(Actions[] actions) {
+        if (actions == null)
+            return new Actions[0];
+
+        return actions.clone();
+    }
+
+    public static boolean checkActionsEqual(Actions[] actions, Actions[] otherActions) {
+        if (actions.length != otherActions.length)
+            return false;
+
+        for (int i = 0; i < actions.length; i++) {
+            if (actions[i] != otherActions[i])
+                return false;
+        }
+
+        return true;
     }
 }

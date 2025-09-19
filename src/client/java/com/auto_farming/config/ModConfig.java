@@ -20,7 +20,7 @@ import net.minecraft.text.Text;
 public class ModConfig implements ConfigData {
 
 	public static Profile currentNewProfile = new Profile();
-	public static ModData modData = AutofarmingClient.modData.clone();
+	public static ModData modData = ModData.cloneOf(AutofarmingClient.modData);
 	private static boolean hasReloaded = false;
 
 	public static Screen build(Screen parent) {

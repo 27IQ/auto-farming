@@ -15,7 +15,7 @@ import static com.auto_farming.actionwrapper.Actions.WALK_FORWARD;
 import com.auto_farming.farmprofiles.Profile;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class ModData implements Cloneable {
+public class ModData {
     private List<Profile> profiles = Arrays.asList(new Profile[] {
             new Profile("5x5 Nether Warts @ 116 (0|0)", 96000, 96000, 3500, 0, 5, new Actions[] { WALK_LEFT },
                     new Actions[] { WALK_RIGHT }, new Actions[] {}, new Actions[] {}),
@@ -72,13 +72,15 @@ public class ModData implements Cloneable {
         return new ArrayList<>(profiles);
     }
 
-    public void setCurrentProfile(Profile current_profile) {
+    public void setCurrentProfile(Profile currentProfile) {
         if (AutofarmingClient.autoFarm != null && AutofarmingClient.autoFarm.isActive) {
             setAlertMessage("please deactivate the running profile first");
             return;
         }
 
-        this.currentProfile = current_profile;
+        currentProfile = profiles.get(profiles.indexOf(currentProfile));
+
+        this.currentProfile = currentProfile;
     }
 
     public Profile getCurrentProfile() {
@@ -112,19 +114,23 @@ public class ModData implements Cloneable {
         return enableDistracted;
     }
 
-    @Override
-    public ModData clone() {
+    public static ModData cloneOf(ModData modData) {
         ModData clonedModData = new ModData();
-        clonedModData.reload = this.reload;
-        if (currentProfile == null) {
+        clonedModData.reload = modData.reload;
+        clonedModData.profiles = Profile.cloneOf(modData.profiles);
+
+        if (modData.currentProfile == null) {
             clonedModData.currentProfile = null;
         } else {
-            clonedModData.currentProfile = this.currentProfile.clone();
+            clonedModData.currentProfile = clonedModData.profiles
+                    .get(clonedModData.profiles.indexOf(modData.currentProfile));
         }
-        clonedModData.showPauseMessage = this.showPauseMessage;
-        clonedModData.forceAttentiveMood = this.forceAttentiveMood;
-        clonedModData.enableDistracted = this.enableDistracted;
+
+        clonedModData.showPauseMessage = modData.showPauseMessage;
+        clonedModData.forceAttentiveMood = modData.forceAttentiveMood;
+        clonedModData.enableDistracted = modData.enableDistracted;
 
         return clonedModData;
     }
+
 }

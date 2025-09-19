@@ -1,5 +1,6 @@
 package com.auto_farming.farmprofiles;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -19,7 +20,7 @@ import me.shedaniel.clothconfig2.gui.entries.TextListEntry;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 
-public class Profile implements Cloneable {
+public class Profile {
     public Profile() {
     }
 
@@ -74,6 +75,7 @@ public class Profile implements Cloneable {
                 });
     }
 
+    @JsonIgnore
     public ButtonEntry getDeleteButton(ConfigEntryBuilder builder, ModData data, Screen parent) {
         return new ButtonEntry(Text.literal("Delete Profile"), (() -> {
             List<Profile> profiles = data.getProfiles();
@@ -131,9 +133,9 @@ public class Profile implements Cloneable {
 
         Profile otherProfile = (Profile) other;
 
-        if (!checkActionsEqual(actionsLeft, otherProfile.actionsLeft) &&
-                !checkActionsEqual(actionsRight, otherProfile.actionsRight) &&
-                !checkActionsEqual(actionsLayerSwap, otherProfile.actionsLayerSwap))
+        if (!Actions.checkActionsEqual(actionsLeft, otherProfile.actionsLeft) &&
+                !Actions.checkActionsEqual(actionsRight, otherProfile.actionsRight) &&
+                !Actions.checkActionsEqual(actionsLayerSwap, otherProfile.actionsLayerSwap))
             return false;
 
         return this.name.equals(otherProfile.name) &&
@@ -143,18 +145,6 @@ public class Profile implements Cloneable {
                 this.layerSwapTime == otherProfile.layerSwapTime &&
                 this.layerCount == otherProfile.layerCount;
 
-    }
-
-    private boolean checkActionsEqual(Actions[] actions, Actions[] otherActions) {
-        if (actions.length != otherActions.length)
-            return false;
-
-        for (int i = 0; i < actions.length; i++) {
-            if (actions[i] != otherActions[i])
-                return false;
-        }
-
-        return true;
     }
 
     @Override
@@ -172,28 +162,29 @@ public class Profile implements Cloneable {
         return this.name;
     }
 
-    @Override
-    public Profile clone() {
+    public static Profile cloneOf(Profile profile) {
         Profile clonedProfile = new Profile(
-                name,
-                leftRowClearTime,
-                rightRowClearTime,
-                voidDropTime,
-                layerSwapTime,
-                layerCount,
-                cloneActions(actionsLeft),
-                cloneActions(actionsRight),
-                cloneActions(actionsLayerSwap),
-                cloneActions(actionsStart));
+                profile.name,
+                profile.leftRowClearTime,
+                profile.rightRowClearTime,
+                profile.voidDropTime,
+                profile.layerSwapTime,
+                profile.layerCount,
+                Actions.cloneOf(profile.actionsLeft),
+                Actions.cloneOf(profile.actionsRight),
+                Actions.cloneOf(profile.actionsLayerSwap),
+                Actions.cloneOf(profile.actionsStart));
 
         return clonedProfile;
     }
 
-    private Actions[] cloneActions(Actions[] actions) {
-        if (actions == null)
-            return new Actions[0];
+    public static List<Profile> cloneOf(List<Profile> profiles) {
+        List<Profile> clonedProfiles = new ArrayList<>();
 
-        return actions.clone();
+        for (Profile profile : profiles) {
+            clonedProfiles.add(Profile.cloneOf(profile));
+        }
+
+        return clonedProfiles;
     }
-
 }
