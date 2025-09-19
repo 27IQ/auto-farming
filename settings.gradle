@@ -2,15 +2,15 @@ pluginManagement {
     repositories {
         maven {
             name = 'Fabric'
-            url = 'https://maven.fabricmc.net/'
+            url = uri('https://maven.fabricmc.net/')
         }
         maven {
             name = 'Architectury'
-            url = 'https://maven.architectury.dev/'
+            url =  uri('https://maven.architectury.dev/')
         }
 		maven {
             name = 'Modrinth Maven'
-            url = 'https://api.modrinth.com/maven/'
+            url =  uri('https://api.modrinth.com/maven/')
         }
         mavenCentral()
         gradlePluginPortal()
