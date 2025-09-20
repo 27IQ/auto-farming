@@ -9,7 +9,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 
 public enum Actions {
-    WALK_FORWARD(), WALK_BACK(), WALK_LEFT(), WALK_RIGHT(), LEFT_CLICK(), SNEAK();
+    WALK_FORWARD(), WALK_BACK(), WALK_LEFT(), WALK_RIGHT(), LEFT_CLICK(), SNEAK(), RIGHT_CLICK();
 
     private boolean active = false;
     private boolean stop = true;
@@ -24,6 +24,7 @@ public enum Actions {
         Actions.WALK_RIGHT.keyMapping = () -> MinecraftClient.getInstance().options.rightKey;
         Actions.LEFT_CLICK.keyMapping = () -> MinecraftClient.getInstance().options.attackKey;
         Actions.SNEAK.keyMapping = () -> MinecraftClient.getInstance().options.sneakKey;
+        Actions.RIGHT_CLICK.keyMapping=()->MinecraftClient.getInstance().options.useKey;
 
         ClientTickEvents.START_CLIENT_TICK.register(client -> {
 
