@@ -1,6 +1,4 @@
-package com.auto_farming.config;
-
-import static com.auto_farming.gui.Alert.setAlertMessage;
+package com.auto_farming.data;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,6 +62,15 @@ public class ModData {
         currentProfile = profiles.get(goodprofileInstance);
     }
 
+    public void set(ModData other) {
+        this.profiles = other.profiles;
+        this.reload = other.reload;
+        this.currentProfile = other.currentProfile;
+        this.showPauseMessage = other.showPauseMessage;
+        this.forceAttentiveMood = other.forceAttentiveMood;
+        this.enableDistracted = other.enableDistracted;
+    }
+
     public void setProfiles(List<Profile> profiles) {
         this.profiles = profiles;
     }
@@ -73,11 +80,6 @@ public class ModData {
     }
 
     public void setCurrentProfile(Profile currentProfile) {
-        if (AutofarmingClient.autoFarm != null && AutofarmingClient.autoFarm.isActive) {
-            setAlertMessage("please deactivate the running profile first");
-            return;
-        }
-
         currentProfile = profiles.get(profiles.indexOf(currentProfile));
 
         this.currentProfile = currentProfile;

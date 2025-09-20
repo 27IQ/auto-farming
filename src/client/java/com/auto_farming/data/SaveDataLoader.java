@@ -1,4 +1,4 @@
-package com.auto_farming.config;
+package com.auto_farming.data;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -50,7 +50,7 @@ public class SaveDataLoader {
         }
 
         data.init();
-        AutofarmingClient.modData = data;
+        ModDataHolder.DATA.set(data);
         return data;
     }
 
@@ -75,7 +75,7 @@ public class SaveDataLoader {
             return;
         }
 
-        AutofarmingClient.modData = data;
+        ModDataHolder.DATA.set(data);
     }
 
     private static String readFromInputStream(InputStream inputStream) throws IOException {

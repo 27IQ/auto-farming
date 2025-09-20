@@ -1,33 +1,38 @@
-package com.auto_farming;
+package com.auto_farming.farminglogic;
 
 import static com.auto_farming.actionwrapper.Actions.LEFT_CLICK;
-import static com.auto_farming.actionwrapper.Actions.SNEAK;
-import static com.auto_farming.actionwrapper.Directions.LEFT;
-import static com.auto_farming.actionwrapper.Directions.NONE;
-import static com.auto_farming.actionwrapper.Directions.RIGHT;
+import static com.auto_farming.actionwrapper.Direction.LEFT;
+import static com.auto_farming.actionwrapper.Direction.RIGHT;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.auto_farming.gui.BasicHUD.setHudMessage;
 import static com.auto_farming.input.Bindings.PAUSE_TOGGLE;
 
+import static com.auto_farming.misc.ThreadHelper.preciseSleep;
+import static com.auto_farming.misc.RandNumberHelper.Random;
+
+import com.auto_farming.AutofarmingClient;
 import com.auto_farming.actionwrapper.Actions;
-import com.auto_farming.actionwrapper.Directions;
+import com.auto_farming.actionwrapper.Direction;
 import com.auto_farming.actionwrapper.MouseLocker;
-import com.auto_farming.chat.Commands;
+import com.auto_farming.data.ModData;
+import com.auto_farming.data.ModDataHolder;
+import com.auto_farming.gui.StatusHUD;
 import com.auto_farming.moods.Mood;
 
 public class AutoFarm {
-
+    private ModData currentSettings;
+    private Direction startingDirection;
     // state
-    public boolean isActive = false;
+    private boolean isActive = false;
     private boolean isPaused = false;
-    private Directions currentDirection = NONE;
+    private Direction currentDirection;
+
     // settings
     private final long POLLING_INTERVAL = 100;
     // moods
-    private Mood currentMood = getNextMood();
+    private Mood currentMood;
     private long currentMoodDuration = 0;
     // debugging
     private boolean debugging = false;
@@ -37,16 +42,33 @@ public class AutoFarm {
     private long startTime = 0;
     private long interval_1 = 0;
 
-    public void onStart() {
+    public AutoFarm() {
+        this.currentSettings = ModData.cloneOf(ModDataHolder.DATA);
+        currentMood = getNextMood();
+    }
+
+    public void start(Direction startingDirection) {
+        this.startingDirection = startingDirection;
+
+        Thread.ofPlatform().start(() -> {
+            runFarm();
+        });
+    }
+
+    public void kill() {
+        isActive = false;
+    }
+
+    private void onStart() {
         isActive = true;
         isPaused = false;
         MouseLocker.lockMouse();
         profileSetUp();
     }
 
-    public void onClose() {
+    private void onClose() {
         MouseLocker.unlockMouse();
-        setHudMessage("");
+        StatusHUD.setMessage("");
     }
 
     public boolean isActive() {
@@ -68,17 +90,8 @@ public class AutoFarm {
         }
     }
 
-    public static void autoSetUp() {
-        Commands.warpGarden();
-        preciseSleep(Random(150, 200));
-        SNEAK.activate();
-        preciseSleep(Random(500, 1000));
-        SNEAK.deactivate();
-        profileSetUp();
-    }
-
-    public static void profileSetUp() {
-        Actions[] setupActions = AutofarmingClient.modData.getCurrentProfile().actionsStart;
+    public void profileSetUp() {
+        Actions[] setupActions = currentSettings.getCurrentProfile().actionsStart;
 
         if (setupActions.length == 0)
             return;
@@ -93,7 +106,7 @@ public class AutoFarm {
         preciseSleep(Random(50, 100));
     }
 
-    public void runFarm(Directions direction) {
+    private void runFarm() {
 
         if (isActive)
             return;
@@ -109,15 +122,15 @@ public class AutoFarm {
 
         while (isActive) {
 
-            currentDirection = direction;
+            currentDirection = startingDirection;
 
-            for (int i = 0; i < AutofarmingClient.modData.getCurrentProfile().layerCount; i++) {
+            for (int i = 0; i < currentSettings.getCurrentProfile().layerCount; i++) {
                 clearRow();
 
                 if (!isActive)
                     break;
 
-                if (AutofarmingClient.modData.getCurrentProfile().layerSwapTime != 0)
+                if (currentSettings.getCurrentProfile().layerSwapTime != 0)
                     layer_swap();
 
                 toggle_direction();
@@ -184,7 +197,8 @@ public class AutoFarm {
             }
 
             double progress = ((double) elapsedTime / totalTime) * 100;
-            setHudMessage(AutofarmingClient.modData.getCurrentProfile().name + "\nRow progress: " + Math.round(progress)
+            StatusHUD.setMessage(currentSettings.getCurrentProfile().name + "\nRow progress: "
+                    + Math.round(progress)
                     + "%\nCurrent mood: "
                     + currentMood.NAME + "\nRow time: " + getTimeStringFromMillis(totalTime) + "\nElapsed row time: "
                     + getTimeStringFromMillis(elapsedTime) + "\nMood Time: "
@@ -211,12 +225,12 @@ public class AutoFarm {
     private void handleVoidDrop() {
 
         if (debugging)
-            walkedTime += AutofarmingClient.modData.getCurrentProfile().voidDropTime;
+            walkedTime += currentSettings.getCurrentProfile().voidDropTime;
 
         long elapsedVoid = 0;
 
-        while (elapsedVoid < AutofarmingClient.modData.getCurrentProfile().voidDropTime && isActive) {
-            long remaining_void = AutofarmingClient.modData.getCurrentProfile().voidDropTime - elapsedVoid;
+        while (elapsedVoid < currentSettings.getCurrentProfile().voidDropTime && isActive) {
+            long remaining_void = currentSettings.getCurrentProfile().voidDropTime - elapsedVoid;
             long sleep_chunk = Math.min(POLLING_INTERVAL, remaining_void);
 
             try {
@@ -227,8 +241,8 @@ public class AutoFarm {
 
             elapsedVoid += sleep_chunk;
 
-            double progress = ((double) elapsedVoid / AutofarmingClient.modData.getCurrentProfile().voidDropTime) * 100;
-            setHudMessage("Void drop: " + Math.round(progress) + "%");
+            double progress = ((double) elapsedVoid / currentSettings.getCurrentProfile().voidDropTime) * 100;
+            StatusHUD.setMessage("Void drop: " + Math.round(progress) + "%");
 
             if (isPaused) {
                 handlePauseState();
@@ -240,8 +254,8 @@ public class AutoFarm {
         long pauseStart = System.currentTimeMillis();
 
         while (isActive && isPaused) {
-            if (AutofarmingClient.modData.isShowPauseMessage())
-                setHudMessage("PAUSED - Press " + PAUSE_TOGGLE.toString() + " to resume");
+            if (currentSettings.isShowPauseMessage())
+                StatusHUD.setMessage("PAUSED - Press " + PAUSE_TOGGLE.toString() + " to resume");
 
             try {
                 Thread.sleep(POLLING_INTERVAL);
@@ -307,7 +321,7 @@ public class AutoFarm {
     private long getMoodClickDelay() {
         long delay = currentMood.CLICK_DELAY;
 
-        if (AutofarmingClient.modData.isForceAttentiveMood()) {
+        if (currentSettings.isForceAttentiveMood()) {
             delay = Mood.ATTENTIVE.CLICK_DELAY;
         }
 
@@ -353,7 +367,7 @@ public class AutoFarm {
 
     private void layer_swap() {
 
-        Actions[] actions = AutofarmingClient.modData.getCurrentProfile().actionsLayerSwap;
+        Actions[] actions = currentSettings.getCurrentProfile().actionsLayerSwap;
 
         Long[] deviation = getClickDeviation(actions.length * 2);
 
@@ -363,9 +377,9 @@ public class AutoFarm {
         }
 
         if (debugging)
-            walkedTime += AutofarmingClient.modData.getCurrentProfile().layerSwapTime;
+            walkedTime += currentSettings.getCurrentProfile().layerSwapTime;
 
-        preciseSleep(AutofarmingClient.modData.getCurrentProfile().layerSwapTime);
+        preciseSleep(currentSettings.getCurrentProfile().layerSwapTime);
 
         for (int i = 0; i < actions.length; i++) {
             actions[i].deactivate();
@@ -378,20 +392,20 @@ public class AutoFarm {
     }
 
     private Actions[] getCurrentDirectionActions() {
-        return currentDirection == LEFT ? AutofarmingClient.modData.getCurrentProfile().actionsLeft
-                : AutofarmingClient.modData.getCurrentProfile().actionsRight;
+        return currentDirection == LEFT ? currentSettings.getCurrentProfile().actionsLeft
+                : currentSettings.getCurrentProfile().actionsRight;
     }
 
     private long getCurrentRowClearTime() {
-        return currentDirection == LEFT ? AutofarmingClient.modData.getCurrentProfile().leftRowClearTime
-                : AutofarmingClient.modData.getCurrentProfile().rightRowClearTime;
+        return currentDirection == LEFT ? currentSettings.getCurrentProfile().leftRowClearTime
+                : currentSettings.getCurrentProfile().rightRowClearTime;
     }
 
     private long getMoodOvershoot() {
 
         long overshoot = 0;
 
-        if (AutofarmingClient.modData.isForceAttentiveMood() || currentMood.OVERSHOOT_DURATION == 0)
+        if (currentSettings.isForceAttentiveMood() || currentMood.OVERSHOOT_DURATION == 0)
             return overshoot;
 
         long roll = Random(0, 1);
@@ -416,8 +430,12 @@ public class AutoFarm {
         List<Double> chances = new ArrayList<>();
 
         for (Mood mood : Mood.values()) {
-            if (mood == Mood.DISTRACTED && !AutofarmingClient.modData.getEnableDistracted())
+            if (mood == Mood.DISTRACTED && !currentSettings.getEnableDistracted()) {
+                double lastChance = chances.getLast();
+                lastChance += Mood.DISTRACTED.MOOD_CHANCE;
+                chances.set(chances.size() - 1, lastChance);
                 continue;
+            }
 
             chances.add(mood.MOOD_CHANCE);
         }
@@ -438,24 +456,6 @@ public class AutoFarm {
         return Mood.values()[selectedMoodIndex];
     }
 
-    private static void preciseSleep(long ms) {
-        long start = System.nanoTime();
-        long end = start + ms * 1_000_000;
-
-        if (ms > 20) {
-            try {
-                Thread.sleep(ms - 15);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return;
-            }
-        }
-
-        while (System.nanoTime() < end) {
-            Thread.onSpinWait();
-        }
-    }
-
     private String getTimeStringFromMillis(long millis) {
         long minutes = millis / 60000;
         long seconds = (millis % 60000) / 1000;
@@ -464,19 +464,4 @@ public class AutoFarm {
         // Format: m:ss,mmm
         return String.format("%d:%02d,%03d", minutes, seconds, milliseconds);
     }
-
-    public static long Random(long min, long max) {
-        if (min > max)
-            throw new IllegalArgumentException("min must be <= max");
-
-        return min + (long) (Math.random() * ((max - min) + 1));
-    }
-
-    public static int Random(int min, int max) {
-        if (min > max)
-            throw new IllegalArgumentException("min must be <= max");
-
-        return min + (int) (Math.random() * ((max - min) + 1));
-    }
-
 }

@@ -1,15 +1,17 @@
 package com.auto_farming.input;
 
 import com.auto_farming.AutofarmingClient;
-import com.auto_farming.actionwrapper.Directions;
+import com.auto_farming.farminglogic.AutoFarm;
+import com.auto_farming.farminglogic.AutoFarmHolder;
+import com.auto_farming.misc.AutoFarmSetup;
 
-import static com.auto_farming.actionwrapper.Directions.LEFT;
-import static com.auto_farming.actionwrapper.Directions.RIGHT;
+import static com.auto_farming.actionwrapper.Direction.LEFT;
+import static com.auto_farming.actionwrapper.Direction.RIGHT;
 import static com.auto_farming.input.Bindings.PAUSE_TOGGLE;
 import static com.auto_farming.input.Bindings.START_LEFT;
 import static com.auto_farming.input.Bindings.START_RIGHT;
 
-import com.auto_farming.AutoFarm;
+import java.util.Optional;
 
 import static com.auto_farming.input.Bindings.AUTO_SET_UP;
 
@@ -17,28 +19,43 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 
 public class InputHandler {
 
-	public static Thread farmThread = null;
+	public static void register() {
 
-	public static void registerKeybinds() {
+		Key.register();
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			while (START_LEFT.bind.wasPressed()) {
 				AutofarmingClient.LOGGER.info("pressed " + START_LEFT.toString());
-				taskHelper(LEFT);
+
+				Optional<AutoFarm> farm = AutoFarmHolder.get();
+				if (farm.isEmpty()) {
+					AutoFarmHolder.startNewFarm(LEFT);
+				} else if (farm.isPresent()) {
+					AutoFarmHolder.removeInstance();
+				}
 			}
 		});
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			while (START_RIGHT.bind.wasPressed()) {
 				AutofarmingClient.LOGGER.info("pressed " + START_RIGHT.toString());
-				taskHelper(RIGHT);
+
+				Optional<AutoFarm> farm = AutoFarmHolder.get();
+				if (farm.isEmpty()) {
+					AutoFarmHolder.startNewFarm(RIGHT);
+				} else if (farm.isPresent()) {
+					farm.get().kill();
+				}
 			}
 		});
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			while (PAUSE_TOGGLE.bind.wasPressed()) {
 				AutofarmingClient.LOGGER.info("pressed " + PAUSE_TOGGLE.toString());
-				AutofarmingClient.autoFarm.pause_toggle();
+				Optional<AutoFarm> farm = AutoFarmHolder.get();
+
+				if (farm.isPresent())
+					farm.get().pause_toggle();
 			}
 		});
 
@@ -46,21 +63,10 @@ public class InputHandler {
 			while (AUTO_SET_UP.bind.wasPressed()) {
 				AutofarmingClient.LOGGER.info("pressed " + AUTO_SET_UP.toString());
 
-				Thread.ofPlatform().daemon(false).start(() -> AutoFarm.autoSetUp());
+				Thread.ofPlatform().daemon(false).start(() -> {
+					AutoFarmSetup.autoSetup();
+				});
 			}
-		});
-	}
-
-	private static void taskHelper(Directions direction) {
-
-		if (farmThread != null) {
-			AutofarmingClient.autoFarm.isActive = false;
-			farmThread = null;
-			return;
-		}
-
-		farmThread = Thread.ofPlatform().daemon(false).start(() -> {
-			AutofarmingClient.getNewAutofarmInstance().runFarm(direction);
 		});
 	}
 }

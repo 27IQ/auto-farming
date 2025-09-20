@@ -2,13 +2,17 @@ package com.auto_farming.config;
 
 import java.util.List;
 
-import com.auto_farming.AutofarmingClient;
 import com.auto_farming.config.clothconfigextensions.ButtonEntry;
 import com.auto_farming.config.clothconfigextensions.DirtyFlag;
+import com.auto_farming.data.ModData;
+import com.auto_farming.data.ModDataHolder;
+import com.auto_farming.data.SaveDataLoader;
 import com.auto_farming.farmprofiles.Profile;
 
+import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
+import me.shedaniel.autoconfig.serializer.Toml4jConfigSerializer;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
@@ -20,13 +24,17 @@ import net.minecraft.text.Text;
 public class ModConfig implements ConfigData {
 
 	public static Profile currentNewProfile = new Profile();
-	public static ModData modData = ModData.cloneOf(AutofarmingClient.modData);
+	public static ModData modData = ModData.cloneOf(ModDataHolder.DATA);
 	private static boolean hasReloaded = false;
+
+	public static void register() {
+		AutoConfig.register(ModConfig.class, Toml4jConfigSerializer::new);
+	}
 
 	public static Screen build(Screen parent) {
 
 		if (!modData.reload) {
-			modData = SaveDataLoader.load();
+			modData = ModData.cloneOf(ModDataHolder.DATA);
 			hasReloaded = false;
 		} else {
 			modData.reload = false;

@@ -13,7 +13,7 @@ public class Commands {
     private static final long MESSAGE_DELAY=300;
     private static long lastMessageSent= System.currentTimeMillis();
 
-    public static void registerCommandQueue(){
+    public static void register(){
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             onTick();
         });

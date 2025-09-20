@@ -1,5 +1,7 @@
 package com.auto_farming.actionwrapper;
 
+import java.util.function.Supplier;
+
 import com.auto_farming.AutofarmingClient;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -11,19 +13,17 @@ public enum Actions {
 
     private boolean active = false;
     private boolean stop = true;
-    private KeyBinding keyMapping;
+    private Supplier<KeyBinding> keyMapping;
     public static boolean first = true;
 
-    public static void initActions() {
+    public static void register() {
 
-        MinecraftClient cl = MinecraftClient.getInstance();
-
-        Actions.WALK_FORWARD.keyMapping = cl.options.forwardKey;
-        Actions.WALK_LEFT.keyMapping = cl.options.leftKey;
-        Actions.WALK_BACK.keyMapping = cl.options.backKey;
-        Actions.WALK_RIGHT.keyMapping = cl.options.rightKey;
-        Actions.LEFT_CLICK.keyMapping = cl.options.attackKey;
-        Actions.SNEAK.keyMapping = cl.options.sneakKey;
+        Actions.WALK_FORWARD.keyMapping = () -> MinecraftClient.getInstance().options.forwardKey;
+        Actions.WALK_LEFT.keyMapping = () -> MinecraftClient.getInstance().options.leftKey;
+        Actions.WALK_BACK.keyMapping = () -> MinecraftClient.getInstance().options.backKey;
+        Actions.WALK_RIGHT.keyMapping = () -> MinecraftClient.getInstance().options.rightKey;
+        Actions.LEFT_CLICK.keyMapping = () -> MinecraftClient.getInstance().options.attackKey;
+        Actions.SNEAK.keyMapping = () -> MinecraftClient.getInstance().options.sneakKey;
 
         ClientTickEvents.START_CLIENT_TICK.register(client -> {
 
@@ -32,10 +32,10 @@ public enum Actions {
 
             for (Actions action : Actions.values()) {
                 if (action.stop) {
-                    action.keyMapping.setPressed(false);
+                    action.keyMapping.get().setPressed(false);
                     action.stop = false;
-                } else if (action.active || action.keyMapping.isPressed()) {
-                    action.keyMapping.setPressed(true);
+                } else if (action.active || action.keyMapping.get().isPressed()) {
+                    action.keyMapping.get().setPressed(true);
                 }
             }
         });
