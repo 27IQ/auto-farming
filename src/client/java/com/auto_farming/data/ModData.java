@@ -63,9 +63,16 @@ public class ModData {
     }
 
     public void set(ModData other) {
-        this.profiles = other.profiles;
+        this.profiles = Profile.cloneOf(other.profiles);
         this.reload = other.reload;
-        this.currentProfile = other.currentProfile;
+
+        if (other.currentProfile == null) {
+            this.currentProfile = null;
+        } else {
+            this.currentProfile = this.profiles
+                    .get(this.profiles.indexOf(other.currentProfile));
+        }
+        
         this.showPauseMessage = other.showPauseMessage;
         this.forceAttentiveMood = other.forceAttentiveMood;
         this.enableDistracted = other.enableDistracted;
