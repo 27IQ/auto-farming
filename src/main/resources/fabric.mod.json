@@ -23,7 +23,6 @@
 		]
 	},
 	"mixins": [
-		"auto-farming.mixins.json",
 		{
 			"config": "auto-farming.client.mixins.json",
 			"environment": "client"
