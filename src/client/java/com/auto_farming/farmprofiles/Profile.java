@@ -68,7 +68,6 @@ public class Profile {
         String json = getJsonString();
 
         return new WideStringListEntry(
-                json,
                 () -> json,
                 jsonString -> {
                     setJsonString(jsonString);
