@@ -93,7 +93,6 @@ public class Profile {
             json = objectMapper.writeValueAsString(this);
         } catch (JsonProcessingException e) {
             AutofarmingClient.LOGGER.error(e.getMessage(), e);
-            e.printStackTrace();
             return "";
         }
 
@@ -109,7 +108,6 @@ public class Profile {
             data = objectMapper.readValue(json, Profile.class);
         } catch (JsonProcessingException e) {
             AutofarmingClient.LOGGER.error(e.getMessage(), e);
-            e.printStackTrace();
             return;
         }
 

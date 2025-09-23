@@ -177,7 +177,7 @@ public class AutoFarm {
             try {
                 Thread.sleep(sleepChunk);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                AutofarmingClient.LOGGER.error(e.getMessage(), e);
             }
 
             long actualSleep = System.currentTimeMillis() - sleepStart;
@@ -236,7 +236,7 @@ public class AutoFarm {
             try {
                 Thread.sleep(sleep_chunk);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                AutofarmingClient.LOGGER.error(e.getMessage(), e);
             }
 
             elapsedVoid += sleep_chunk;
@@ -260,7 +260,7 @@ public class AutoFarm {
             try {
                 Thread.sleep(POLLING_INTERVAL);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                AutofarmingClient.LOGGER.error(e.getMessage(), e);
             }
 
             if (debugging)
