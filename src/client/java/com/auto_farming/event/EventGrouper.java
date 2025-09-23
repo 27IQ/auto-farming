@@ -12,13 +12,16 @@ import com.auto_farming.event.events.basicevents.BasicEvent;
 public class EventGrouper {
 
     private static final Map<String, Set<Class<? extends BasicEvent>>> CACHE = new ConcurrentHashMap<>();
+    public static final String MAIN_EVENTS = "com.auto_farming.event.events.mainevents";
+    public static final String SCOREBOARD_EVENTS = "com.auto_farming.event.events.scoreboardevents";
+    public static final String BASIC_EVENTS = "com.auto_farming.event.events.basicevents";
 
     public static Set<Class<? extends BasicEvent>> getMainEvents() {
-        return getClasses("com.auto_farming.event.events.mainevents");
+        return getClasses(MAIN_EVENTS);
     }
 
     public static Set<Class<? extends BasicEvent>> getScoreboardEvents() {
-        return getClasses("com.auto_farming.event.events.scoreboardevents");
+        return getClasses(SCOREBOARD_EVENTS);
     }
 
     private static Set<Class<? extends BasicEvent>> getClasses(String packageName) {
@@ -26,8 +29,7 @@ public class EventGrouper {
             Reflections reflections = new Reflections(pkg);
             return Collections.unmodifiableSet(
                     reflections.getSubTypesOf(BasicEvent.class).stream()
-                            .filter(c -> !c.getPackageName().startsWith(
-                                    "com.auto_farming.event.events.basicevents"))
+                            .filter(c -> !c.getPackageName().startsWith(BASIC_EVENTS))
                             .collect(java.util.stream.Collectors.toSet()));
         });
     }
