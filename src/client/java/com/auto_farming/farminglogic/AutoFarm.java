@@ -27,6 +27,7 @@ public class AutoFarm {
     // state
     private boolean isActive = false;
     private boolean isPaused = false;
+    private boolean isForcePaused = false;
     private Direction currentDirection;
 
     // settings
@@ -40,7 +41,7 @@ public class AutoFarm {
     private long walkedTime = 0;
     private long pausedTime = 0;
     private long startTime = 0;
-    private long interval_1 = 0;
+    private long interval1 = 0;
 
     public AutoFarm() {
         this.currentSettings = ModData.cloneOf(ModDataHolder.DATA);
@@ -62,6 +63,7 @@ public class AutoFarm {
     private void onStart() {
         isActive = true;
         isPaused = false;
+        isForcePaused = false;
         MouseLocker.lockMouse();
         profileSetUp();
     }
@@ -75,9 +77,9 @@ public class AutoFarm {
         return isActive;
     }
 
-    public void pause_toggle() {
+    public void pauseToggle() {
 
-        if (!isActive)
+        if (!isActive || isForcePaused)
             return;
 
         isPaused = !isPaused;
@@ -88,6 +90,10 @@ public class AutoFarm {
         } else {
             MouseLocker.unlockMouse();
         }
+    }
+
+    public void setForcePause(boolean forcePause){
+        this.isForcePaused=forcePause;
     }
 
     public void profileSetUp() {
@@ -131,25 +137,25 @@ public class AutoFarm {
                     break;
 
                 if (currentSettings.getCurrentProfile().layerSwapTime != 0)
-                    layer_swap();
+                    layerSwap();
 
-                toggle_direction();
+                toggleDirection();
             }
 
             handleVoidDrop();
             profileSetUp();
 
             if (debugging) {
-                interval_1 = System.currentTimeMillis();
-                long intervalDuration = interval_1 - startTime;
+                interval1 = System.currentTimeMillis();
+                long intervalDuration = interval1 - startTime;
 
                 AutofarmingClient.LOGGER.info(
-                        "added_time: " + addedTime +
-                                "\nwalked_time: " + walkedTime +
-                                "\npaused_time: " + pausedTime +
-                                "\nstart_time: " + startTime +
-                                "\ninterval_time: " + interval_1 +
-                                "\ninterval_duration: " + intervalDuration);
+                        "addedTime: " + addedTime +
+                                "\nwalkedTime: " + walkedTime +
+                                "\npausedTime: " + pausedTime +
+                                "\nstartTime: " + startTime +
+                                "\nintervalTime: " + interval1 +
+                                "\nintervalDuration: " + intervalDuration);
             }
         }
 
@@ -170,7 +176,7 @@ public class AutoFarm {
             long remainingTime = totalTime - elapsedTime;
             long sleepChunk = Math.min(POLLING_INTERVAL, remainingTime);
 
-            rowPause();
+            checkPause();
 
             long sleepStart = System.currentTimeMillis();
 
@@ -182,7 +188,7 @@ public class AutoFarm {
 
             long actualSleep = System.currentTimeMillis() - sleepStart;
 
-            rowPause();
+            checkPause();
 
             elapsedTime += actualSleep;
 
@@ -209,9 +215,9 @@ public class AutoFarm {
         deactivateCurrentActions();
     }
 
-    private void rowPause() {
+    private void checkPause() {
 
-        if (isPaused) {
+        if (isPaused || isForcePaused) {
             MouseLocker.unlockMouse();
             deactivateCurrentActions();
             handlePauseState();
@@ -230,23 +236,21 @@ public class AutoFarm {
         long elapsedVoid = 0;
 
         while (elapsedVoid < currentSettings.getCurrentProfile().voidDropTime && isActive) {
-            long remaining_void = currentSettings.getCurrentProfile().voidDropTime - elapsedVoid;
-            long sleep_chunk = Math.min(POLLING_INTERVAL, remaining_void);
+            long remainingVoid = currentSettings.getCurrentProfile().voidDropTime - elapsedVoid;
+            long sleepChunk = Math.min(POLLING_INTERVAL, remainingVoid);
 
             try {
-                Thread.sleep(sleep_chunk);
+                Thread.sleep(sleepChunk);
             } catch (InterruptedException e) {
                 AutofarmingClient.LOGGER.error(e.getMessage(), e);
             }
 
-            elapsedVoid += sleep_chunk;
+            elapsedVoid += sleepChunk;
 
             double progress = ((double) elapsedVoid / currentSettings.getCurrentProfile().voidDropTime) * 100;
             StatusHUD.setMessage("Void drop: " + Math.round(progress) + "%");
 
-            if (isPaused) {
-                handlePauseState();
-            }
+            checkPause();
         }
     }
 
@@ -365,7 +369,7 @@ public class AutoFarm {
         return pull == 1 ? true : false;
     }
 
-    private void layer_swap() {
+    private void layerSwap() {
 
         Actions[] actions = currentSettings.getCurrentProfile().actionsLayerSwap;
 
@@ -387,7 +391,7 @@ public class AutoFarm {
         }
     }
 
-    private void toggle_direction() {
+    private void toggleDirection() {
         currentDirection = currentDirection == LEFT ? RIGHT : LEFT;
     }
 
