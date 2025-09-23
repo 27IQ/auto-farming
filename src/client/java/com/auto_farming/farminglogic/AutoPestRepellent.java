@@ -10,6 +10,8 @@ import com.auto_farming.scoreboard.RegexResult;
 
 public class AutoPestRepellent {
 
+    public static long lastSuccess = 0;
+
     @Event(PestRepellentEvent.class)
     public static void managePestRepellent(PestRepellentEvent event) {
 
@@ -18,7 +20,7 @@ public class AutoPestRepellent {
 
         assert prNone != null && prReg != null;
 
-        if (prNone.found || prReg.found)
+        if ((prNone.found || prReg.found))
             AUTO_PEST_REPELLENT_TRANSACTION.queueIfAbsent();
     }
 }

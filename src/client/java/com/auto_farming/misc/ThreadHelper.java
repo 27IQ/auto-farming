@@ -4,7 +4,7 @@ import static com.auto_farming.misc.RandNumberHelper.Random;
 
 public class ThreadHelper {
 
-    public static final long SHORT_DURATION = 50, MEDIUM_DURATION = 150, LONG_DURATION = 300;
+    public static final long SHORT_DURATION = 50, MEDIUM_DURATION = 150, LONG_DURATION = 300, VERY_LONG_DURATION = 500;
 
     public static void randomSleep(long baseDuration) {
         preciseSleep(Random(baseDuration, (long) (baseDuration * 1.5)));

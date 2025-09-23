@@ -19,7 +19,7 @@ public class Scoreboard {
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
 
-            if (counter < 100) {
+            if (counter < 10) {
                 counter++;
                 return;
             }

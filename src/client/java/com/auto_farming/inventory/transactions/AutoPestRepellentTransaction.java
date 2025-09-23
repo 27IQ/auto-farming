@@ -2,13 +2,16 @@ package com.auto_farming.inventory.transactions;
 
 import java.util.function.Consumer;
 
+import com.auto_farming.farminglogic.AutoFarmHolder;
+import com.auto_farming.farminglogic.FarmingDisrupt;
 import com.auto_farming.inventory.InventoryTransaction;
 import com.auto_farming.inventory.transactionhelper.ItemNotInInventoryException;
 
 public final class AutoPestRepellentTransaction extends InventoryTransaction {
 
-    private AutoPestRepellentTransaction(String name, Runnable transaction, Consumer<Exception> crashHandler) {
-        super(name, transaction, crashHandler);
+    private AutoPestRepellentTransaction(String name, Runnable transaction, Consumer<Exception> crashHandler,
+            Runnable onSuccess, long maxCooldown) {
+        super(name, transaction, crashHandler, onSuccess, maxCooldown);
     }
 
     public static final String PEST_REPELLENT_MAX = "PEST_REPELLENT_MAX";
@@ -26,7 +29,11 @@ public final class AutoPestRepellentTransaction extends InventoryTransaction {
             },
             (exception) -> {
                 if (exception instanceof ItemNotInInventoryException) {
-
+                    AutoFarmHolder.get().get().queueDisrupt(
+                            new FarmingDisrupt("Please add a " + PEST_REPELLENT_MAX + " to your inventory."));
                 }
-            });
+            },
+            () -> {
+            },
+            15000);
 }

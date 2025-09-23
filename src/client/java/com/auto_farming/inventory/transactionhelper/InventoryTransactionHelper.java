@@ -1,11 +1,11 @@
 package com.auto_farming.inventory.transactionhelper;
 
+import static com.auto_farming.misc.ThreadHelper.VERY_LONG_DURATION;
 import static com.auto_farming.misc.ThreadHelper.MEDIUM_DURATION;
 import static com.auto_farming.misc.ThreadHelper.SHORT_DURATION;
 import static com.auto_farming.misc.ThreadHelper.randomSleep;
 
-import java.util.Optional;
-
+import com.auto_farming.AutofarmingClient;
 import com.auto_farming.actionwrapper.Actions;
 
 import net.minecraft.client.MinecraftClient;
@@ -17,6 +17,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 
 public abstract class InventoryTransactionHelper {
@@ -35,26 +36,30 @@ public abstract class InventoryTransactionHelper {
     }
 
     protected static String getSkyblockId(ItemStack stack) {
-
-        NbtComponent nbtComponent = stack.get(DataComponentTypes.CUSTOM_DATA);
-        if (nbtComponent == null) {
+        if (stack == null || stack.isEmpty())
             return null;
+
+        NbtComponent custom = stack.get(DataComponentTypes.CUSTOM_DATA);
+        if (custom == null)
+            return null;
+
+        NbtCompound nbt = custom.copyNbt();
+
+        if (nbt.contains("id")) {
+            String id = nbt.getString("id").get();
+            if (id != null && !id.isEmpty())
+                return id;
         }
 
-        NbtCompound nbt = nbtComponent.copyNbt();
         if (nbt.contains("ExtraAttributes")) {
-            Optional<NbtCompound> extra = nbt.getCompound("ExtraAttributes");
-
-            if (extra.isEmpty())
-                return null;
-
-            if (extra.get().contains("id")) {
-                Optional<String> id = extra.get().getString("id");
-
-                if (id.isPresent())
-                    return id.get();
+            NbtCompound extra = nbt.getCompound("ExtraAttributes").get();
+            if (extra.contains("id")) {
+                String id = extra.getString("id").get();
+                if (id != null && !id.isEmpty())
+                    return id;
             }
         }
+
         return null;
     }
 
@@ -93,17 +98,20 @@ public abstract class InventoryTransactionHelper {
     }
 
     protected static int moveItemToHotbar(int from) {
+
+        if (from < 0 || from >= 36) {
+            throw new IllegalArgumentException("Invalid source slot: " + from);
+        }
+
         PlayerInventory inventory = getInventory();
 
-        if (from < PlayerInventory.HOTBAR_SIZE)
+        if (from < PlayerInventory.HOTBAR_SIZE && from != 8)
             return from;
 
         int to = -1;
 
         for (int i = 0; i < PlayerInventory.HOTBAR_SIZE - 1; i++) {
-            ItemStack currentHotbarStack = inventory.getStack(i);
-
-            if (currentHotbarStack.isEmpty()) {
+            if (inventory.getStack(i).isEmpty()) {
                 to = i;
                 break;
             }
@@ -116,10 +124,47 @@ public abstract class InventoryTransactionHelper {
         return to;
     }
 
-    protected static void moveItem(int from, int to) {
-        pickupItem(from);
-        pickupItem(to);
-        pickupItem(from);
+    protected static void moveItem(int fromInvIndex, int toHotbarInvIndex) {
+
+        if (toHotbarInvIndex < 0 || toHotbarInvIndex > 7) {
+            throw new IllegalArgumentException("Invalid hotbar slot (must be 0–7): " + toHotbarInvIndex);
+        }
+        if (fromInvIndex < 0 || fromInvIndex >= PlayerInventory.MAIN_SIZE) {
+            throw new IllegalArgumentException("Invalid source slot (must be 0–35): " + fromInvIndex);
+        }
+
+        int fromHandler = toHandlerSlotId(fromInvIndex);
+        int toHandler = toHandlerSlotId(toHotbarInvIndex);
+
+        AutofarmingClient.LOGGER.info("moving item from inv:" + fromInvIndex + " -> " + toHotbarInvIndex +
+                " (handler " + fromHandler + " -> " + toHandler + ")");
+
+        clickPickup(fromHandler);
+        clickPickup(toHandler);
+        clickPickup(fromHandler);
+    }
+
+    private static int toHandlerSlotId(int invIndex) {
+        var mc = MinecraftClient.getInstance();
+        var handler = mc.player.currentScreenHandler;
+
+        for (int i = 0; i < handler.slots.size(); i++) {
+            Slot s = handler.getSlot(i);
+            if (s.inventory == mc.player.getInventory() && s.getIndex() == invIndex) {
+                return i;
+            }
+        }
+        throw new IllegalStateException("No handler slot for player inv index " + invIndex);
+    }
+
+    private static void clickPickup(int handlerSlotId) {
+        var mc = MinecraftClient.getInstance();
+        mc.interactionManager.clickSlot(
+                mc.player.currentScreenHandler.syncId,
+                handlerSlotId,
+                0,
+                SlotActionType.PICKUP,
+                mc.player);
     }
 
     protected static int slotOfSkyblockItem(String targetId) {
@@ -131,25 +176,29 @@ public abstract class InventoryTransactionHelper {
             if (id == null)
                 continue;
 
-            if (id.equals(targetId))
+            AutofarmingClient.LOGGER.info("sbitem: " + id + " !");
+
+            if (id.equalsIgnoreCase(targetId.trim()))
                 return i;
         }
 
         return -1;
     }
 
-    protected static void pickupItem(int slot) {
-        ClientPlayerInteractionManager interaction = MinecraftClient.getInstance().interactionManager;
+    protected static void pickupItem(int invIndex) {
         ClientPlayerEntity player = getPlayer();
-        int syncId = player.currentScreenHandler.syncId;
-
+        ClientPlayerInteractionManager interaction = MinecraftClient.getInstance().interactionManager;
         if (player == null || interaction == null) {
             return;
         }
 
-        randomSleep(MEDIUM_DURATION);
-        interaction.clickSlot(syncId, slot, 0, SlotActionType.PICKUP, player);
-        randomSleep(MEDIUM_DURATION);
+        int handlerSlotId = toHandlerSlotId(invIndex);
+
+        int syncId = player.currentScreenHandler.syncId;
+
+        randomSleep(VERY_LONG_DURATION);
+        interaction.clickSlot(syncId, handlerSlotId, 0, SlotActionType.PICKUP, player);
+        randomSleep(VERY_LONG_DURATION);
     }
 
     protected static void selectHotbarSlot(int slot) {

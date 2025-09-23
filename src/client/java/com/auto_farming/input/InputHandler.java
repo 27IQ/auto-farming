@@ -42,7 +42,14 @@ public class InputHandler {
 			while (PAUSE_TOGGLE.bind.wasPressed()) {
 				AutofarmingClient.LOGGER.info("pressed " + PAUSE_TOGGLE.toString());
 
-				AutoFarmHolder.get().ifPresent((farm) -> farm.pauseToggle());
+				AutoFarmHolder.get().ifPresent((farm) -> {
+					if(farm.isForcePaused()){
+						farm.nextDisrupt();
+						return;
+					}
+
+					farm.pauseToggle();
+				});
 			}
 		});
 
