@@ -5,9 +5,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
 import com.auto_farming.AutofarmingClient;
+import com.auto_farming.inventory.transactionhelper.InventoryTransactionHelper;
 import com.auto_farming.inventory.transactionhelper.ItemNotInInventoryException;
 
-public class InventoryTransaction {
+public class InventoryTransaction extends InventoryTransactionHelper {
     private static final Queue<InventoryTransaction> transactionQueue = new ConcurrentLinkedQueue<>();
     private final String name;
     private final Runnable transaction;
@@ -19,8 +20,15 @@ public class InventoryTransaction {
         this.crashHandler = crashHandler;
     }
 
-    public void queue() {
-        transactionQueue.add(this);
+    public boolean queueIfAbsent() {
+        if (!transactionQueue.contains(this))
+            return transactionQueue.offer(this);
+
+        return false;
+    }
+
+    public boolean isQueueEmpty() {
+        return transactionQueue.isEmpty();
     }
 
     public static void runNextTransactions() {

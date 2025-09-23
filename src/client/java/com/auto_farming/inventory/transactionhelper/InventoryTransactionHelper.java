@@ -19,13 +19,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.slot.SlotActionType;
 
-public class InventoryTransactionHelper {
+public abstract class InventoryTransactionHelper {
 
-    public static ClientPlayerEntity getPlayer() {
+    private static ClientPlayerEntity getPlayer() {
         return MinecraftClient.getInstance().player;
     }
 
-    public static PlayerInventory getInventory() {
+    private static PlayerInventory getInventory() {
         ClientPlayerEntity currentPlayer = getPlayer();
 
         if (currentPlayer == null)
@@ -34,7 +34,7 @@ public class InventoryTransactionHelper {
         return currentPlayer.getInventory();
     }
 
-    public static String getSkyblockId(ItemStack stack) {
+    protected static String getSkyblockId(ItemStack stack) {
 
         NbtComponent nbtComponent = stack.get(DataComponentTypes.CUSTOM_DATA);
         if (nbtComponent == null) {
@@ -58,7 +58,7 @@ public class InventoryTransactionHelper {
         return null;
     }
 
-    public static boolean isSkyblockItemInInventory(String targetId) {
+    protected static boolean isSkyblockItemInInventory(String targetId) {
         PlayerEntity player = getPlayer();
 
         if (player == null)
@@ -75,7 +75,7 @@ public class InventoryTransactionHelper {
         return false;
     }
 
-    public static boolean isSkyblockItemInHotBar(String targetId) {
+    protected static boolean isSkyblockItemInHotBar(String targetId) {
         PlayerEntity player = getPlayer();
 
         if (player == null)
@@ -92,8 +92,11 @@ public class InventoryTransactionHelper {
         return false;
     }
 
-    public static int moveItemToHotbar(int from) {
+    protected static int moveItemToHotbar(int from) {
         PlayerInventory inventory = getInventory();
+
+        if (from < PlayerInventory.HOTBAR_SIZE)
+            return from;
 
         int to = -1;
 
@@ -113,13 +116,13 @@ public class InventoryTransactionHelper {
         return to;
     }
 
-    public static void moveItem(int from, int to) {
+    protected static void moveItem(int from, int to) {
         pickupItem(from);
         pickupItem(to);
         pickupItem(from);
     }
 
-    public static int slotOfSkyblockItem(String targetId) {
+    protected static int slotOfSkyblockItem(String targetId) {
         PlayerInventory inventory = getInventory();
 
         for (int i = 0; i < PlayerInventory.MAIN_SIZE; i++) {
@@ -135,7 +138,7 @@ public class InventoryTransactionHelper {
         return -1;
     }
 
-    public static void pickupItem(int slot) {
+    protected static void pickupItem(int slot) {
         ClientPlayerInteractionManager interaction = MinecraftClient.getInstance().interactionManager;
         ClientPlayerEntity player = getPlayer();
         int syncId = player.currentScreenHandler.syncId;
@@ -149,7 +152,7 @@ public class InventoryTransactionHelper {
         randomSleep(MEDIUM_DURATION);
     }
 
-    public static void selectHotbarSlot(int slot) {
+    protected static void selectHotbarSlot(int slot) {
         if (!PlayerInventory.isValidHotbarIndex(slot))
             return;
 
@@ -158,7 +161,7 @@ public class InventoryTransactionHelper {
         randomSleep(SHORT_DURATION);
     }
 
-    public static void useItem() {
+    protected static void useItem() {
         randomSleep(SHORT_DURATION);
         Actions.RIGHT_CLICK.activate();
         randomSleep(MEDIUM_DURATION);

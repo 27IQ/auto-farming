@@ -1,21 +1,22 @@
 package com.auto_farming.event.events.mainevents;
 
-import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
-import com.auto_farming.event.events.basicevents.BasicEvent;
+import com.auto_farming.event.events.basicevents.BasicScoreboardEvent;
+import com.auto_farming.scoreboard.RegexPattern;
 import com.auto_farming.scoreboard.RegexResult;
 
-public class ScoreboardRefreshEvent extends BasicEvent {
+public class ScoreboardRefreshEvent extends BasicScoreboardEvent {
 
-    protected List<RegexResult> result;
+    protected ConcurrentHashMap<RegexPattern, RegexResult> result;
 
-    public ScoreboardRefreshEvent(List<RegexResult> result) {
-        super();
+    public ScoreboardRefreshEvent(ConcurrentHashMap<RegexPattern, RegexResult> result) {
+        super(result);
         setName(this.getClass().getName());
         this.result = result;
     }
 
-    public List<RegexResult> getResult() {
+    public ConcurrentHashMap<RegexPattern, RegexResult> getResult() {
         return result;
     }
 }

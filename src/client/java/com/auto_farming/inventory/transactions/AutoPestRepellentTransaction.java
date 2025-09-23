@@ -1,34 +1,32 @@
 package com.auto_farming.inventory.transactions;
 
-import static com.auto_farming.inventory.transactionhelper.InventoryTransactionHelper.*;
+import java.util.function.Consumer;
 
 import com.auto_farming.inventory.InventoryTransaction;
 import com.auto_farming.inventory.transactionhelper.ItemNotInInventoryException;
 
-public final class AutoPestRepellentTransaction {
+public final class AutoPestRepellentTransaction extends InventoryTransaction {
 
-    public static final String PEST_REPELLENT = "PEST_REPELLENT", PEST_REPELLENT_MAX = "PEST_REPELLENT_MAX";
+    private AutoPestRepellentTransaction(String name, Runnable transaction, Consumer<Exception> crashHandler) {
+        super(name, transaction, crashHandler);
+    }
+
+    public static final String PEST_REPELLENT_MAX = "PEST_REPELLENT_MAX";
 
     public static final InventoryTransaction AUTO_PEST_REPELLENT_TRANSACTION = new InventoryTransaction(
             "AUTO_PEST_REPELLENT_TRANSACTION",
             () -> {
-                int indexOfRepellent = slotOfSkyblockItem(PEST_REPELLENT);
-                int indexOfRepellentMax = slotOfSkyblockItem(PEST_REPELLENT_MAX);
+                int indexOfRepellentMax;
+                if ((indexOfRepellentMax = slotOfSkyblockItem(PEST_REPELLENT_MAX)) == -1)
+                    throw new ItemNotInInventoryException(PEST_REPELLENT_MAX);
 
-                int target = Math.max(indexOfRepellentMax, indexOfRepellent);
-
-                if (target == -1)
-                    throw new ItemNotInInventoryException(PEST_REPELLENT + "/" + PEST_REPELLENT_MAX);
-
-                int dest = moveItemToHotbar(target);
+                int dest = moveItemToHotbar(indexOfRepellentMax);
                 selectHotbarSlot(dest);
                 useItem();
             },
             (exception) -> {
-                switch (exception.getClass().getSimpleName()) {
-                    case "ItemNotInInventoryException":
+                if (exception instanceof ItemNotInInventoryException) {
 
-                        break;
                 }
             });
 }

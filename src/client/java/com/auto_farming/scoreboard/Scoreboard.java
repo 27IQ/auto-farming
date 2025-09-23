@@ -1,8 +1,7 @@
 package com.auto_farming.scoreboard;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.auto_farming.event.EventManager;
 import com.auto_farming.event.events.mainevents.ScoreboardRefreshEvent;
@@ -30,12 +29,12 @@ public class Scoreboard {
         });
     }
 
-    public static List<RegexResult> parseScoreboard() {
+    public static ConcurrentHashMap<RegexPattern, RegexResult> parseScoreboard() {
         String currentBoard = getScoreboardSnapshot();
-        List<RegexResult> results = new ArrayList<>();
+        ConcurrentHashMap<RegexPattern, RegexResult> results = new ConcurrentHashMap<>();
 
         for (RegexPattern pattern : RegexPattern.values()) {
-            results.add(new RegexResult(pattern, currentBoard));
+            results.put(pattern, new RegexResult(pattern, currentBoard));
         }
 
         return results;
