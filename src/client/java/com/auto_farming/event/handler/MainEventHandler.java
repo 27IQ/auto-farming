@@ -12,12 +12,13 @@ public class MainEventHandler {
     @Event(ScoreboardRefreshEvent.class)
     public static void handle(ScoreboardRefreshEvent event) {
 
-        for (Class<? extends BasicEvent > sbEvent : EventGrouper.getScoreboardEvents()) {
+        for (Class<? extends BasicEvent> sbEvent : EventGrouper.getScoreboardEvents()) {
             try {
-				EventManager.trigger(sbEvent.getDeclaredConstructor(event.getResult().getClass()).newInstance(event.getResult()));
-			} catch (Exception e) {
-                AutofarmingClient.LOGGER.error(e.getMessage(),e);
-			}
+                EventManager.trigger(
+                        sbEvent.getDeclaredConstructor(event.getResult().getClass()).newInstance(event.getResult()));
+            } catch (Exception e) {
+                AutofarmingClient.LOGGER.error(e.getMessage(), e);
+            }
         }
     }
 }

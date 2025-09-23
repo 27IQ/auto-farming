@@ -93,21 +93,21 @@ public class InventoryTransactionHelper {
     }
 
     public static int moveItemToHotbar(int from) {
-        PlayerInventory inventory=getInventory();
+        PlayerInventory inventory = getInventory();
 
-        int to=-1;
+        int to = -1;
 
-        for(int i=0;i<PlayerInventory.HOTBAR_SIZE-1;i++){
-            ItemStack currentHotbarStack=inventory.getStack(i);
+        for (int i = 0; i < PlayerInventory.HOTBAR_SIZE - 1; i++) {
+            ItemStack currentHotbarStack = inventory.getStack(i);
 
-            if(currentHotbarStack.isEmpty()){
-                to=i;
+            if (currentHotbarStack.isEmpty()) {
+                to = i;
                 break;
             }
         }
 
-        if(to==-1)
-            to=7;
+        if (to == -1)
+            to = 7;
 
         moveItem(from, to);
         return to;
@@ -120,15 +120,15 @@ public class InventoryTransactionHelper {
     }
 
     public static int slotOfSkyblockItem(String targetId) {
-        PlayerInventory inventory=getInventory();
+        PlayerInventory inventory = getInventory();
 
         for (int i = 0; i < PlayerInventory.MAIN_SIZE; i++) {
             String id = getSkyblockId(inventory.getStack(i));
 
-            if(id==null)
+            if (id == null)
                 continue;
 
-            if(id.equals(targetId))
+            if (id.equals(targetId))
                 return i;
         }
 
@@ -150,7 +150,7 @@ public class InventoryTransactionHelper {
     }
 
     public static void selectHotbarSlot(int slot) {
-        if(!PlayerInventory.isValidHotbarIndex(slot))
+        if (!PlayerInventory.isValidHotbarIndex(slot))
             return;
 
         randomSleep(SHORT_DURATION);
@@ -158,7 +158,7 @@ public class InventoryTransactionHelper {
         randomSleep(SHORT_DURATION);
     }
 
-    public static void useItem(){
+    public static void useItem() {
         randomSleep(SHORT_DURATION);
         Actions.RIGHT_CLICK.activate();
         randomSleep(MEDIUM_DURATION);

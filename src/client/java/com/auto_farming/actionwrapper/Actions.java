@@ -24,7 +24,7 @@ public enum Actions {
         Actions.WALK_RIGHT.keyMapping = () -> MinecraftClient.getInstance().options.rightKey;
         Actions.LEFT_CLICK.keyMapping = () -> MinecraftClient.getInstance().options.attackKey;
         Actions.SNEAK.keyMapping = () -> MinecraftClient.getInstance().options.sneakKey;
-        Actions.RIGHT_CLICK.keyMapping=()->MinecraftClient.getInstance().options.useKey;
+        Actions.RIGHT_CLICK.keyMapping = () -> MinecraftClient.getInstance().options.useKey;
 
         ClientTickEvents.START_CLIENT_TICK.register(client -> {
 

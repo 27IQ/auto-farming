@@ -72,7 +72,7 @@ public class ModData {
             this.currentProfile = this.profiles
                     .get(this.profiles.indexOf(other.currentProfile));
         }
-        
+
         this.showPauseMessage = other.showPauseMessage;
         this.forceAttentiveMood = other.forceAttentiveMood;
         this.enableDistracted = other.enableDistracted;

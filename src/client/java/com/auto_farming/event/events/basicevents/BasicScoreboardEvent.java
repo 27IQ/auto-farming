@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.auto_farming.scoreboard.RegexResult;
 
-public class BasicScoreboardEvent extends BasicEvent{
+public class BasicScoreboardEvent extends BasicEvent {
     private List<RegexResult> result;
 
     public BasicScoreboardEvent(ArrayList<RegexResult> result) {

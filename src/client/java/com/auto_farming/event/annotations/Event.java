@@ -10,7 +10,6 @@ import static java.lang.annotation.ElementType.METHOD;
 
 @Retention(RUNTIME)
 @Target(METHOD)
-public @interface Event{
+public @interface Event {
     Class<? extends BasicEvent> value();
 }
-

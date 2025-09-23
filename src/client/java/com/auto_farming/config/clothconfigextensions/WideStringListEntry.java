@@ -26,13 +26,13 @@ public class WideStringListEntry extends AbstractConfigListEntry<String> {
 
         super(Text.of(""), false);
 
-        this.defaultValue=defaultValue;
+        this.defaultValue = defaultValue;
 
         textFieldWidget = new TextFieldWidget(MinecraftClient.getInstance().textRenderer, 0, 0, 148, 18, Text.empty());
         textFieldWidget.setMaxLength(999999);
         textFieldWidget.setText(defaultValue.get());
 
-        widgets=new ArrayList<>(List.of(textFieldWidget));
+        widgets = new ArrayList<>(List.of(textFieldWidget));
 
         this.saveCallback = saveConsumer;
 

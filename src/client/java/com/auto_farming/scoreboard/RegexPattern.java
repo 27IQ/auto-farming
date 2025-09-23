@@ -13,18 +13,19 @@ public enum RegexPattern {
 
     private final Pattern pattern;
 
-    private RegexPattern(String regex){
+    private RegexPattern(String regex) {
         this.pattern = Pattern.compile(regex);
     }
 
-    public Matcher getMatcher(String toMatch){
+    public Matcher getMatcher(String toMatch) {
         return this.pattern.matcher(toMatch);
     }
 
-    public Optional<RegexResult> getResult(List<RegexResult> results){
-        List<RegexResult> matchingResult=results.stream().filter((result)->result.pattern==this).collect(Collectors.toList());
+    public Optional<RegexResult> getResult(List<RegexResult> results) {
+        List<RegexResult> matchingResult = results.stream().filter((result) -> result.pattern == this)
+                .collect(Collectors.toList());
 
-        if(matchingResult.size()!=1)
+        if (matchingResult.size() != 1)
             return Optional.empty();
 
         return Optional.of(matchingResult.get(0));

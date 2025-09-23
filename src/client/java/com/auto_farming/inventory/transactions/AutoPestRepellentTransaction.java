@@ -27,7 +27,7 @@ public final class AutoPestRepellentTransaction {
             (exception) -> {
                 switch (exception.getClass().getSimpleName()) {
                     case "ItemNotInInventoryException":
-                            
+
                         break;
                 }
             });
