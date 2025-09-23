@@ -2,10 +2,7 @@ package com.auto_farming.misc;
 
 import static com.auto_farming.actionwrapper.Actions.SNEAK;
 
-import java.util.Optional;
-
 import com.auto_farming.chat.Commands;
-import com.auto_farming.farminglogic.AutoFarm;
 import com.auto_farming.farminglogic.AutoFarmHolder;
 
 public class AutoFarmSetup {
@@ -17,9 +14,6 @@ public class AutoFarmSetup {
         ThreadHelper.preciseSleep(RandNumberHelper.Random(500, 1000));
         SNEAK.deactivate();
 
-        Optional<AutoFarm> farm = AutoFarmHolder.get();
-
-        if (farm.isPresent())
-            farm.get().profileSetUp();
+        AutoFarmHolder.get().ifPresent((farm) -> farm.profileSetUp());
     }
 }

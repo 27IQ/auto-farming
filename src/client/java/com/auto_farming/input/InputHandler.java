@@ -1,7 +1,6 @@
 package com.auto_farming.input;
 
 import com.auto_farming.AutofarmingClient;
-import com.auto_farming.farminglogic.AutoFarm;
 import com.auto_farming.farminglogic.AutoFarmHolder;
 import com.auto_farming.misc.AutoFarmSetup;
 
@@ -10,8 +9,6 @@ import static com.auto_farming.actionwrapper.Direction.RIGHT;
 import static com.auto_farming.input.Bindings.PAUSE_TOGGLE;
 import static com.auto_farming.input.Bindings.START_LEFT;
 import static com.auto_farming.input.Bindings.START_RIGHT;
-
-import java.util.Optional;
 
 import static com.auto_farming.input.Bindings.AUTO_SET_UP;
 
@@ -27,12 +24,8 @@ public class InputHandler {
 			while (START_LEFT.bind.wasPressed()) {
 				AutofarmingClient.LOGGER.info("pressed " + START_LEFT.toString());
 
-				Optional<AutoFarm> farm = AutoFarmHolder.get();
-				if (farm.isEmpty()) {
-					AutoFarmHolder.startNewFarm(LEFT);
-				} else if (farm.isPresent()) {
-					AutoFarmHolder.removeInstance();
-				}
+				AutoFarmHolder.get().ifPresentOrElse((farm) -> AutoFarmHolder.removeInstance(),
+						() -> AutoFarmHolder.startNewFarm(LEFT));
 			}
 		});
 
@@ -40,22 +33,16 @@ public class InputHandler {
 			while (START_RIGHT.bind.wasPressed()) {
 				AutofarmingClient.LOGGER.info("pressed " + START_RIGHT.toString());
 
-				Optional<AutoFarm> farm = AutoFarmHolder.get();
-				if (farm.isEmpty()) {
-					AutoFarmHolder.startNewFarm(RIGHT);
-				} else if (farm.isPresent()) {
-					farm.get().kill();
-				}
+				AutoFarmHolder.get().ifPresentOrElse((farm) -> AutoFarmHolder.removeInstance(),
+						() -> AutoFarmHolder.startNewFarm(RIGHT));
 			}
 		});
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			while (PAUSE_TOGGLE.bind.wasPressed()) {
 				AutofarmingClient.LOGGER.info("pressed " + PAUSE_TOGGLE.toString());
-				Optional<AutoFarm> farm = AutoFarmHolder.get();
 
-				if (farm.isPresent())
-					farm.get().pause_toggle();
+				AutoFarmHolder.get().ifPresent((farm) -> farm.pauseToggle());
 			}
 		});
 
