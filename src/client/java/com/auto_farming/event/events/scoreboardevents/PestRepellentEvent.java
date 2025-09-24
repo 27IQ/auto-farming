@@ -10,6 +10,5 @@ public class PestRepellentEvent extends BasicScoreboardEvent {
 
 	public PestRepellentEvent(ConcurrentHashMap<RegexPattern, RegexResult> result) {
 		super(result);
-		setName(this.getClass().getName());
 	}
 }

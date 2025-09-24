@@ -4,9 +4,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public enum RegexPattern {
-    PEST_REPELLENT_MAX("Repellent: MAX\\s\\(\\d+[\\w\\s]+\\)"),
-    PEST_REPELLENT_REGULAR("Repellent: Regular\\s\\(\\d+[\\w\\s]+\\)"),
-    PEST_REPELLENT_NONE("Repellent: None");
+    PEST_REPELLENT_MAX_PATTERN("Repellent: MAX\\s\\(\\d+[\\w\\s]+\\)"),
+    PEST_REPELLENT_REGULAR_PATTERN("Repellent: Regular\\s\\(\\d+[\\w\\s]+\\)"),
+    PEST_REPELLENT_NONE_PATTERN("Repellent: None");
 
     private final Pattern pattern;
 

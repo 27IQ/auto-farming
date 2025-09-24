@@ -11,7 +11,7 @@ public class Commands {
 
     private static Queue<String> sendQueue = new LinkedList<String>();
     private static final long MESSAGE_DELAY = 300;
-    private static long lastMessageSent = System.currentTimeMillis();
+    private static long lastMessageSent = System.nanoTime();
 
     public static void register() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
@@ -20,9 +20,9 @@ public class Commands {
     }
 
     private static void onTick() {
-        if (!sendQueue.isEmpty() && (System.currentTimeMillis() - lastMessageSent) > MESSAGE_DELAY) {
+        if (!sendQueue.isEmpty() && ((System.nanoTime() - lastMessageSent) / 1_000_000) > MESSAGE_DELAY) {
             MinecraftClient.getInstance().player.networkHandler.sendChatMessage(sendQueue.remove());
-            lastMessageSent = System.currentTimeMillis();
+            lastMessageSent = System.nanoTime();
         }
     }
 
@@ -35,7 +35,7 @@ public class Commands {
             ClientPlayerEntity player = MinecraftClient.getInstance().player;
             if (player != null) {
                 player.networkHandler.sendChatMessage(message);
-                lastMessageSent = System.currentTimeMillis();
+                lastMessageSent = System.nanoTime();
                 return;
             }
         }
@@ -43,6 +43,6 @@ public class Commands {
     }
 
     private static boolean canSendInstantly() {
-        return sendQueue.isEmpty() && (System.currentTimeMillis() - lastMessageSent) > MESSAGE_DELAY;
+        return sendQueue.isEmpty() && ((System.nanoTime() - lastMessageSent) / 1_000_000) > MESSAGE_DELAY;
     }
 }

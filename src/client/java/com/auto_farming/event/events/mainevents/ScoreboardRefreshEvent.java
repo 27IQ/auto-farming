@@ -12,7 +12,6 @@ public class ScoreboardRefreshEvent extends BasicScoreboardEvent {
 
     public ScoreboardRefreshEvent(ConcurrentHashMap<RegexPattern, RegexResult> result) {
         super(result);
-        setName(this.getClass().getName());
         this.result = result;
     }
 

@@ -8,9 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static com.auto_farming.farminglogic.PauseEvents.INVENTORY_PAUSE;
-import static com.auto_farming.farminglogic.PauseEvents.NORMAL_PAUSE;
-
+import static com.auto_farming.input.Bindings.PAUSE_TOGGLE;
 import static com.auto_farming.misc.ThreadHelper.preciseSleep;
 import static com.auto_farming.misc.RandNumberHelper.Random;
 
@@ -20,6 +18,8 @@ import com.auto_farming.actionwrapper.Direction;
 import com.auto_farming.actionwrapper.MouseLocker;
 import com.auto_farming.data.ModData;
 import com.auto_farming.data.ModDataHolder;
+import com.auto_farming.event.EventManager;
+import com.auto_farming.event.events.mainevents.ForcePauseHandleEvent;
 import com.auto_farming.gui.StatusHUD;
 import com.auto_farming.inventory.InventoryTransaction;
 import com.auto_farming.moods.Mood;
@@ -34,7 +34,6 @@ public class AutoFarm {
     private Direction currentDirection;
     private ConcurrentLinkedQueue<FarmingDisrupt> disruptQueue;
     private boolean nextDisrupt = false;
-
     // settings
     private final long POLLING_INTERVAL = 100;
     // moods
@@ -83,12 +82,12 @@ public class AutoFarm {
         return isActive;
     }
 
-    public boolean isForcePaused(){
+    public boolean isForcePaused() {
         return isForcePaused;
     }
 
-    public void nextDisrupt(){
-        nextDisrupt=true;
+    public void nextDisrupt() {
+        nextDisrupt = true;
     }
 
     public void pauseToggle() {
@@ -107,10 +106,14 @@ public class AutoFarm {
     }
 
     public void queueDisrupt(FarmingDisrupt disrupt) {
+        AutofarmingClient.LOGGER.info("Queuing disrupt: " + disrupt.getMessage());
         disruptQueue.offer(disrupt);
     }
 
     public void profileSetUp() {
+        if (!isActive)
+            return;
+
         Actions[] setupActions = currentSettings.getCurrentProfile().actionsStart;
 
         if (setupActions.length == 0)
@@ -132,7 +135,7 @@ public class AutoFarm {
             return;
 
         if (debugging) {
-            startTime = System.currentTimeMillis();
+            startTime = System.nanoTime();
             addedTime = 0;
             walkedTime = 0;
             pausedTime = 0;
@@ -160,8 +163,8 @@ public class AutoFarm {
             profileSetUp();
 
             if (debugging) {
-                interval1 = System.currentTimeMillis();
-                long intervalDuration = interval1 - startTime;
+                interval1 = System.nanoTime();
+                long intervalDuration = (interval1 - startTime) / 1_000_000;
 
                 AutofarmingClient.LOGGER.info(
                         "addedTime: " + addedTime +
@@ -192,7 +195,7 @@ public class AutoFarm {
 
             checkPause();
 
-            long sleepStart = System.currentTimeMillis();
+            long sleepStart = System.nanoTime();
 
             try {
                 Thread.sleep(sleepChunk);
@@ -200,7 +203,7 @@ public class AutoFarm {
                 AutofarmingClient.LOGGER.error(e.getMessage(), e);
             }
 
-            long actualSleep = System.currentTimeMillis() - sleepStart;
+            long actualSleep = (System.nanoTime() - sleepStart) / 1_000_000;
 
             checkPause();
 
@@ -233,9 +236,11 @@ public class AutoFarm {
         checkForcePauseEligible();
 
         if (isPaused || isForcePaused) {
+            AutofarmingClient.LOGGER.info("Pausing ...");
             MouseLocker.unlockMouse();
             deactivateCurrentActions();
             handlePauseState();
+            AutofarmingClient.LOGGER.info("Unpausing ...");
             if (isActive) {
                 activateCurrentActions();
                 MouseLocker.lockMouse();
@@ -244,8 +249,12 @@ public class AutoFarm {
     }
 
     private void checkForcePauseEligible() {
-        if (!InventoryTransaction.isQueueEmpty())
+        if (!InventoryTransaction.isQueueEmpty() || !disruptQueue.isEmpty()) {
             isForcePaused = true;
+            AutofarmingClient.LOGGER
+                    .info("InventoryTransactionQueue: " + InventoryTransaction.queueSize() + " Objects in queue");
+            AutofarmingClient.LOGGER.info("DisruptQueue: " + disruptQueue.size() + " Objects in queue");
+        }
     }
 
     private void handleVoidDrop() {
@@ -275,20 +284,19 @@ public class AutoFarm {
     }
 
     private void handlePauseState() {
-        long pauseStart = System.currentTimeMillis();
+        long pauseStart = System.nanoTime();
 
         while (isActive && (isPaused || isForcePaused)) {
             if (isPaused && currentSettings.isShowPauseMessage()) {
-                StatusHUD.setMessage("PAUSED - " + NORMAL_PAUSE.MESSAGE);
+                StatusHUD.setMessage("PAUSED - Press " + PAUSE_TOGGLE.toString() + " to resume");
             } else if (isForcePaused && currentSettings.isShowPauseMessage()) {
-                if (!InventoryTransaction.isQueueEmpty())
-                    StatusHUD.setMessage("PAUSED - " + INVENTORY_PAUSE.MESSAGE);
-                InventoryTransaction.runNextTransactions();
+                EventManager.trigger(new ForcePauseHandleEvent());
             }
 
             while (!disruptQueue.isEmpty()) {
                 nextDisrupt = false;
                 StatusHUD.setMessage(disruptQueue.poll().getMessage());
+
                 while (!nextDisrupt) {
                     try {
                         Thread.sleep(POLLING_INTERVAL);
@@ -298,7 +306,8 @@ public class AutoFarm {
                         AutofarmingClient.LOGGER.error(e.getMessage(), e);
                     }
                 }
-                InventoryTransaction.runNextTransactions();
+
+                EventManager.trigger(new ForcePauseHandleEvent());
             }
 
             isForcePaused = false;
@@ -314,7 +323,7 @@ public class AutoFarm {
         }
 
         if (debugging) {
-            long actualPause = System.currentTimeMillis() - pauseStart;
+            long actualPause = (System.nanoTime() - pauseStart) / 1_000_000;
             pausedTime += actualPause;
         }
     }

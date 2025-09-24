@@ -1,39 +1,35 @@
 package com.auto_farming.inventory;
 
-import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Consumer;
 
 import com.auto_farming.AutofarmingClient;
+import com.auto_farming.event.annotations.Event;
+import com.auto_farming.event.events.mainevents.ForcePauseHandleEvent;
 import com.auto_farming.inventory.transactionhelper.InventoryTransactionHelper;
-import com.auto_farming.inventory.transactionhelper.ItemNotInInventoryException;
 
-public class InventoryTransaction extends InventoryTransactionHelper {
+public abstract class InventoryTransaction extends InventoryTransactionHelper {
     private static final Queue<InventoryTransaction> transactionQueue = new ConcurrentLinkedQueue<>();
-    private final String name;
-    private final Runnable transaction;
-    private final Runnable onSuccess;
-    private final Consumer<Exception> crashHandler;
     private long lastSuccess;
-    private final long maxCooldown;
+    private final long cooldown;
 
-    public InventoryTransaction(String name, Runnable transaction, Consumer<Exception> crashHandler,
-            Runnable onSuccess, long maxCooldown) {
-        this.name = name;
-        this.transaction = transaction;
-        this.crashHandler = crashHandler;
-        this.onSuccess = onSuccess;
+    public InventoryTransaction(long maxCooldown) {
         lastSuccess = 0;
-        this.maxCooldown = maxCooldown;
+        this.cooldown = maxCooldown;
     }
+
+    protected abstract void transaction();
+
+    protected abstract void onSuccess();
+
+    protected abstract void crashHandler(Exception e);
 
     public boolean queueIfAbsent() {
 
-        if (transactionQueue.contains(this) || System.currentTimeMillis() - this.lastSuccess < maxCooldown)
+        if (transactionQueue.contains(this) || ((System.nanoTime() - lastSuccess) / 1_000_000) < cooldown)
             return false;
 
-        AutofarmingClient.LOGGER.info("added " + this.name + " to the queue");
+        AutofarmingClient.LOGGER.info("added " + this.getClass().getSimpleName() + " to the queue");
         return transactionQueue.offer(this);
 
     }
@@ -42,20 +38,31 @@ public class InventoryTransaction extends InventoryTransactionHelper {
         return transactionQueue.isEmpty();
     }
 
-    public static void runNextTransactions() {
+    public static int queueSize() {
+        return transactionQueue.size();
+    }
+
+    @Event(ForcePauseHandleEvent.class)
+    public static void runNextTransactions(ForcePauseHandleEvent event) {
+        AutofarmingClient.LOGGER.info("running InventoryTransactions Queue ...");
+        if (transactionQueue.isEmpty())
+            return;
+
         int interations = transactionQueue.size();
+
+        AutofarmingClient.LOGGER.info("InventoryTransactionQueue: handling " + interations + " Transactions ...");
 
         for (int i = 0; i < interations; i++) {
             InventoryTransaction transaction = transactionQueue.peek();
 
             try {
-                transaction.transaction.run();
-                AutofarmingClient.LOGGER.info(transaction.name + "has succeeded");
-                transaction.lastSuccess = System.currentTimeMillis();
-                transaction.onSuccess.run();
-            } catch (ItemNotInInventoryException e) {
+                transaction.transaction();
+                AutofarmingClient.LOGGER.info(transaction.getClass().getSimpleName() + " has succeeded");
+                transaction.lastSuccess = System.nanoTime();
+                transaction.onSuccess();
+            } catch (Exception e) {
                 AutofarmingClient.LOGGER.error(e.getMessage(), e);
-                transaction.crashHandler.accept(e);
+                transaction.crashHandler(e);
                 transactionQueue.offer(transaction);
             }
 
@@ -63,20 +70,5 @@ public class InventoryTransaction extends InventoryTransactionHelper {
         }
 
         selectHotbarSlot(0);
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        if (other == null || !(other instanceof InventoryTransaction))
-            return false;
-
-        InventoryTransaction otherInventoryTransaction = (InventoryTransaction) other;
-
-        return this.name.equals(otherInventoryTransaction.name);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, transaction, crashHandler);
     }
 }

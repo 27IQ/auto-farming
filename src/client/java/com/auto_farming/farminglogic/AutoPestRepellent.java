@@ -1,7 +1,7 @@
 package com.auto_farming.farminglogic;
 
-import static com.auto_farming.scoreboard.RegexPattern.PEST_REPELLENT_NONE;
-import static com.auto_farming.scoreboard.RegexPattern.PEST_REPELLENT_REGULAR;
+import static com.auto_farming.scoreboard.RegexPattern.PEST_REPELLENT_NONE_PATTERN;
+import static com.auto_farming.scoreboard.RegexPattern.PEST_REPELLENT_REGULAR_PATTERN;
 
 import com.auto_farming.event.annotations.Event;
 import com.auto_farming.event.events.scoreboardevents.PestRepellentEvent;
@@ -10,13 +10,11 @@ import com.auto_farming.scoreboard.RegexResult;
 
 public class AutoPestRepellent {
 
-    public static long lastSuccess = 0;
-
     @Event(PestRepellentEvent.class)
     public static void managePestRepellent(PestRepellentEvent event) {
 
-        RegexResult prNone = event.getResult().get(PEST_REPELLENT_NONE);
-        RegexResult prReg = event.getResult().get(PEST_REPELLENT_REGULAR);
+        RegexResult prNone = event.getResult().get(PEST_REPELLENT_NONE_PATTERN);
+        RegexResult prReg = event.getResult().get(PEST_REPELLENT_REGULAR_PATTERN);
 
         assert prNone != null && prReg != null;
 
