@@ -1,0 +1,9 @@
+[02:18:58] [Render thread/INFO]: [System] [CHAT] Pest Repellent MAX expires in 10s
+[02:19:03] [Render thread/INFO]: [System] [CHAT] Pest Repellent MAX expires in 5s
+[02:19:03] [Render thread/INFO]: [System] [CHAT] §e[SkyHanni] §cCan not read Crop Fortune from tab list! Open /widget, enable the Stats Widget and show latest Crop Fortune, also give the widget enough priority.
+[02:19:04] [Render thread/INFO]: [System] [CHAT] Pest Repellent MAX expires in 4s
+[02:19:04] [Render thread/INFO]: [System] [CHAT] UNCOMMON DROP! Dicer dropped 4x Enchanted Melon Slice!
+[02:19:04] [Render thread/INFO]: [System] [CHAT] UNCOMMON DROP! Dicer dropped 4x Enchanted Melon Slice!
+[02:19:05] [Render thread/INFO]: [System] [CHAT] Pest Repellent MAX expires in 3s
+[02:19:06] [Render thread/INFO]: [System] [CHAT] Pest Repellent MAX expires in 2s
+[02:19:07] [Render thread/INFO]: [System] [CHAT] Pest Repellent MAX expires in 1s
