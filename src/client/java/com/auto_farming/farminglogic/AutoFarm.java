@@ -25,6 +25,7 @@ import com.auto_farming.inventory.InventoryTransaction;
 import com.auto_farming.moods.Mood;
 
 public class AutoFarm {
+    // profile
     private ModData currentSettings;
     private Direction startingDirection;
     // state
