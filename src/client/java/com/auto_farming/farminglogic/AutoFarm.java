@@ -40,12 +40,10 @@ public class AutoFarm {
     private Mood currentMood;
     private long currentMoodDuration = 0;
     // debugging
-    private boolean debugging = false;
-    private long addedTime = 0;
+    private long otherDelays = 0;
     private long walkedTime = 0;
     private long pausedTime = 0;
     private long startTime = 0;
-    private long interval1 = 0;
 
     public AutoFarm() {
         this.currentSettings = ModData.cloneOf(ModDataHolder.DATA);
@@ -134,13 +132,6 @@ public class AutoFarm {
         if (isActive)
             return;
 
-        if (debugging) {
-            startTime = System.nanoTime();
-            addedTime = 0;
-            walkedTime = 0;
-            pausedTime = 0;
-        }
-
         onStart();
 
         while (isActive) {
@@ -161,28 +152,22 @@ public class AutoFarm {
 
             handleVoidDrop();
             profileSetUp();
-
-            if (debugging) {
-                interval1 = System.nanoTime();
-                long intervalDuration = (interval1 - startTime) / 1_000_000;
-
-                AutofarmingClient.LOGGER.info(
-                        "addedTime: " + addedTime +
-                                "\nwalkedTime: " + walkedTime +
-                                "\npausedTime: " + pausedTime +
-                                "\nstartTime: " + startTime +
-                                "\nintervalTime: " + interval1 +
-                                "\nintervalDuration: " + intervalDuration);
-            }
         }
 
         onClose();
     }
 
     private void clearRow() {
+        resetDebug();
 
         long moodOvershoot = getMoodOvershoot();
         long totalTime = getCurrentRowClearTime() + Random(0, 250) + moodOvershoot;
+
+        if (getCurrentRowClearTime() > totalTime) {
+            AutofarmingClient.LOGGER.error("RowClearTime got reduced! " + getCurrentRowClearTime() + "->" + totalTime
+                    + " overwriting totalTime");
+            totalTime = getCurrentRowClearTime();
+        }
 
         activateCurrentActions();
 
@@ -193,28 +178,13 @@ public class AutoFarm {
             long remainingTime = totalTime - elapsedTime;
             long sleepChunk = Math.min(POLLING_INTERVAL, remainingTime);
 
-            checkPause();
+            long actualTimeWaited = rowWait(sleepChunk);
 
-            long sleepStart = System.nanoTime();
-
-            try {
-                Thread.sleep(sleepChunk);
-            } catch (InterruptedException e) {
-                AutofarmingClient.LOGGER.error(e.getMessage(), e);
-            }
-
-            long actualSleep = (System.nanoTime() - sleepStart) / 1_000_000;
-
-            checkPause();
-
-            elapsedTime += actualSleep;
-
-            if (debugging) {
-                walkedTime += actualSleep;
-            }
+            elapsedTime += actualTimeWaited;
+            walkedTime += actualTimeWaited;
 
             if (currentMoodDuration > 0) {
-                currentMoodDuration -= actualSleep;
+                currentMoodDuration -= actualTimeWaited;
             } else {
                 switchMood();
             }
@@ -230,6 +200,41 @@ public class AutoFarm {
         }
 
         deactivateCurrentActions();
+
+        long duration = (System.nanoTime() - startTime) / 1_000_000;
+        long sum = (walkedTime + pausedTime + otherDelays);
+
+        AutofarmingClient.LOGGER.info(
+                "projectedRowDuration: " + totalTime +
+                        "\nwalkedTime: " + walkedTime +
+                        "\nwalkedTimeDiff: " + (walkedTime - totalTime) +
+                        "\npausedTime: " + pausedTime +
+                        "\notherTimeWaited: " + otherDelays +
+                        "\nsum: " + sum +
+                        "\nprocessing%: "
+                        + ((((double) duration / (double) sum) - 1) * 100) + "%" +
+                        "\nintervalDuration: " + duration +
+                        "\nintervalDiff: " + (duration - sum));
+
+    }
+
+    private long rowWait(long millis) {
+        checkPause();
+        long actualSleep = waitFor(millis);
+        checkPause();
+        return actualSleep;
+    }
+
+    private long waitFor(long millis) {
+        long sleepStart = System.nanoTime();
+
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            AutofarmingClient.LOGGER.error(e.getMessage(), e);
+        }
+
+        return (System.nanoTime() - sleepStart) / 1_000_000;
     }
 
     private void checkPause() {
@@ -259,8 +264,7 @@ public class AutoFarm {
 
     private void handleVoidDrop() {
 
-        if (debugging)
-            walkedTime += currentSettings.getCurrentProfile().voidDropTime;
+        walkedTime += currentSettings.getCurrentProfile().voidDropTime;
 
         long elapsedVoid = 0;
 
@@ -268,18 +272,10 @@ public class AutoFarm {
             long remainingVoid = currentSettings.getCurrentProfile().voidDropTime - elapsedVoid;
             long sleepChunk = Math.min(POLLING_INTERVAL, remainingVoid);
 
-            try {
-                Thread.sleep(sleepChunk);
-            } catch (InterruptedException e) {
-                AutofarmingClient.LOGGER.error(e.getMessage(), e);
-            }
-
-            elapsedVoid += sleepChunk;
+            elapsedVoid += rowWait(sleepChunk);
 
             double progress = ((double) elapsedVoid / currentSettings.getCurrentProfile().voidDropTime) * 100;
             StatusHUD.setMessage("Void drop: " + Math.round(progress) + "%");
-
-            checkPause();
         }
     }
 
@@ -298,13 +294,7 @@ public class AutoFarm {
                 StatusHUD.setMessage(disruptQueue.poll().getMessage());
 
                 while (!nextDisrupt) {
-                    try {
-                        Thread.sleep(POLLING_INTERVAL);
-                        if (debugging)
-                            pausedTime += POLLING_INTERVAL;
-                    } catch (InterruptedException e) {
-                        AutofarmingClient.LOGGER.error(e.getMessage(), e);
-                    }
+                    waitFor(POLLING_INTERVAL);
                 }
 
                 EventManager.trigger(new ForcePauseHandleEvent());
@@ -312,20 +302,10 @@ public class AutoFarm {
 
             isForcePaused = false;
 
-            try {
-                Thread.sleep(POLLING_INTERVAL);
-            } catch (InterruptedException e) {
-                AutofarmingClient.LOGGER.error(e.getMessage(), e);
-            }
-
-            if (debugging)
-                pausedTime += POLLING_INTERVAL;
+            waitFor(POLLING_INTERVAL);
         }
 
-        if (debugging) {
-            long actualPause = (System.nanoTime() - pauseStart) / 1_000_000;
-            pausedTime += actualPause;
-        }
+        pausedTime += (System.nanoTime() - pauseStart) / 1_000_000;
     }
 
     private void activateCurrentActions() {
@@ -431,8 +411,7 @@ public class AutoFarm {
             preciseSleep(deviation[i]);
         }
 
-        if (debugging)
-            walkedTime += currentSettings.getCurrentProfile().layerSwapTime;
+        walkedTime += currentSettings.getCurrentProfile().layerSwapTime;
 
         preciseSleep(currentSettings.getCurrentProfile().layerSwapTime);
 
@@ -518,5 +497,16 @@ public class AutoFarm {
 
         // Format: m:ss,mmm
         return String.format("%d:%02d,%03d", minutes, seconds, milliseconds);
+    }
+
+    private void resetDebug() {
+        startTime = System.nanoTime();
+        otherDelays = 0;
+        walkedTime = 0;
+        pausedTime = 0;
+    }
+
+    public void reportDelay(long delayMillis) {
+        otherDelays += delayMillis;
     }
 }

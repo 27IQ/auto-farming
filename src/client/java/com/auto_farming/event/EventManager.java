@@ -53,11 +53,12 @@ public class EventManager {
                 try {
                     if (method.getParameterCount() == 1
                             && method.getParameterTypes()[0].isAssignableFrom(event.getClass())) {
-                        AutofarmingClient.LOGGER
-                                .info("invoking " + event.getClass().getName() + " on " + method.getName());
+                        // AutofarmingClient.LOGGER.info("invoking " + event.getClass().getName() + " on
+                        // " + method.getName());
                         method.invoke(instances.get(method), event);
                     } else {
-                        throw new MethodNotSupportedException("The first parameter needs to be the event ...");
+                        throw new MethodNotSupportedException(
+                                "The first parameter needs to be the event ... of " + method.getName());
                     }
 
                 } catch (Exception e) {
