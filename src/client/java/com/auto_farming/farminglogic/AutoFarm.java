@@ -290,11 +290,11 @@ public class AutoFarm {
                 EventManager.trigger(new ForcePauseHandleEvent());
             }
 
-            while (!disruptQueue.isEmpty()) {
+            while (isActive && !disruptQueue.isEmpty()) {
                 nextDisrupt = false;
                 StatusHUD.setMessage(disruptQueue.poll().getMessage());
 
-                while (!nextDisrupt) {
+                while (isActive && !nextDisrupt) {
                     waitFor(POLLING_INTERVAL);
                 }
 
