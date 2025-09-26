@@ -42,6 +42,10 @@ public abstract class InventoryTransaction extends InventoryTransactionHelper {
         return transactionQueue.size();
     }
 
+    public static void clearQueue() {
+        transactionQueue.clear();
+    }
+
     @Event(ForcePauseHandleEvent.class)
     public static void runNextTransactions(ForcePauseHandleEvent event) {
         AutofarmingClient.LOGGER.info("running InventoryTransactions Queue ...");
@@ -69,6 +73,6 @@ public abstract class InventoryTransaction extends InventoryTransactionHelper {
             transactionQueue.poll();
         }
 
-        selectHotbarSlot(0);
+        selectFarmingTool();
     }
 }

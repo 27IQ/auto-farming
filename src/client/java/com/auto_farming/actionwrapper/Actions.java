@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import com.auto_farming.AutofarmingClient;
-
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
@@ -52,13 +50,13 @@ public enum Actions {
 
     public void activate() {
         this.active = true;
-        AutofarmingClient.LOGGER.info(this.name().toLowerCase() + " activated");
+        // AutofarmingClient.LOGGER.info(this.name().toLowerCase() + " activated");
     }
 
     public void deactivate() {
         this.active = false;
         this.stop = true;
-        AutofarmingClient.LOGGER.info(this.name().toLowerCase() + " deactivated");
+        // AutofarmingClient.LOGGER.info(this.name().toLowerCase() + " deactivated");
     }
 
     public static Actions[] cloneOf(Actions[] actions) {

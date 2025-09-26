@@ -18,6 +18,7 @@ import com.auto_farming.data.ModDataHolder;
 import com.auto_farming.event.EventManager;
 import com.auto_farming.event.events.mainevents.ForcePauseHandleEvent;
 import com.auto_farming.gui.StatusHUD;
+import com.auto_farming.inventory.HotbarSlot;
 import com.auto_farming.inventory.InventoryTransaction;
 import com.auto_farming.misc.MiscHelper;
 import com.auto_farming.moods.Mood;
@@ -58,6 +59,7 @@ public class AutoFarm extends Waiter {
         this.startingDirection = startingDirection;
 
         farmingThread = Thread.ofPlatform().start(() -> {
+            checkPause();
             runFarm();
         });
     }
@@ -76,6 +78,7 @@ public class AutoFarm extends Waiter {
     private void onClose() {
         MouseLocker.unlockMouse();
         StatusHUD.setMessage("");
+        InventoryTransaction.clearQueue();
     }
 
     public boolean isForcePaused() {
@@ -95,21 +98,6 @@ public class AutoFarm extends Waiter {
         } else {
             MouseLocker.unlockMouse();
         }
-    }
-
-    /*
-     * 
-     * Disrupts
-     * 
-     */
-
-    public void nextDisrupt() {
-        nextDisrupt = true;
-    }
-
-    public void queueDisrupt(FarmingDisrupt disrupt) {
-        AutofarmingClient.LOGGER.info("Queuing disrupt: " + disrupt.getMessage());
-        disruptQueue.offer(disrupt);
     }
 
     /*
@@ -288,16 +276,7 @@ public class AutoFarm extends Waiter {
                 EventManager.trigger(new ForcePauseHandleEvent());
             }
 
-            while (!farmingThread.isInterrupted() && !disruptQueue.isEmpty()) {
-                nextDisrupt = false;
-                StatusHUD.setMessage(disruptQueue.poll().getMessage());
-
-                while (!farmingThread.isInterrupted() && !nextDisrupt) {
-                    waitFor(POLLING_INTERVAL);
-                }
-
-                EventManager.trigger(new ForcePauseHandleEvent());
-            }
+            handleDisrupts();
 
             isForcePaused = false;
 
@@ -305,6 +284,34 @@ public class AutoFarm extends Waiter {
         }
 
         pausedTime += (System.nanoTime() - pauseStart) / 1_000_000;
+    }
+
+    /*
+     * 
+     * Disrupts
+     * 
+     */
+
+    public void nextDisrupt() {
+        nextDisrupt = true;
+    }
+
+    public void queueDisrupt(FarmingDisrupt disrupt) {
+        AutofarmingClient.LOGGER.info("Queuing disrupt: " + disrupt.getMessage());
+        disruptQueue.offer(disrupt);
+    }
+
+    public void handleDisrupts() {
+        while (!farmingThread.isInterrupted() && !disruptQueue.isEmpty()) {
+            nextDisrupt = false;
+            StatusHUD.setMessage(disruptQueue.poll().getMessage());
+
+            while (!farmingThread.isInterrupted() && !nextDisrupt) {
+                waitFor(POLLING_INTERVAL);
+            }
+
+            EventManager.trigger(new ForcePauseHandleEvent());
+        }
     }
 
     /*
@@ -339,6 +346,20 @@ public class AutoFarm extends Waiter {
 
         LEFT_CLICK.deactivate();
         randomSteapSleep(SHORT_DURATION);
+    }
+
+    /*
+     * 
+     * Profile
+     * 
+     */
+
+    public HotbarSlot getFarmingToolSlot() {
+        return settings.getFarmingToolSlot();
+    }
+
+    public HotbarSlot getFallbackSlot() {
+        return settings.getFallbackSlot();
     }
 
     /*

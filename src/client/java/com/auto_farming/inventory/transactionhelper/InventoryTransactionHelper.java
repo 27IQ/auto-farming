@@ -2,8 +2,12 @@ package com.auto_farming.inventory.transactionhelper;
 
 import static com.auto_farming.misc.ThreadHelper.*;
 
+import java.util.Optional;
+
 import com.auto_farming.AutofarmingClient;
 import com.auto_farming.actionwrapper.Actions;
+import com.auto_farming.farminglogic.AutoFarm;
+import com.auto_farming.farminglogic.AutoFarmHolder;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -114,8 +118,14 @@ public abstract class InventoryTransactionHelper {
             }
         }
 
-        if (to == -1)
+        if (to == -1) {
             to = 7;
+
+            Optional<AutoFarm> farm = AutoFarmHolder.get();
+
+            if (farm.isPresent())
+                to = farm.get().getFallbackSlot().ID;
+        }
 
         moveItem(from, to);
         return to;
@@ -196,6 +206,17 @@ public abstract class InventoryTransactionHelper {
         randomSleep(VERY_LONG_DURATION);
         interaction.clickSlot(syncId, handlerSlotId, 0, SlotActionType.PICKUP, player);
         randomSleep(VERY_LONG_DURATION);
+    }
+
+    protected static void selectFarmingTool() {
+        Optional<AutoFarm> farm = AutoFarmHolder.get();
+
+        if (farm.isPresent()) {
+            selectHotbarSlot(farm.get().getFarmingToolSlot().ID);
+        } else {
+            selectHotbarSlot(0);
+        }
+
     }
 
     protected static void selectHotbarSlot(int slot) {

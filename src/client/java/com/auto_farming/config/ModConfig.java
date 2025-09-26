@@ -7,6 +7,7 @@ import com.auto_farming.config.clothconfigextensions.DirtyFlag;
 import com.auto_farming.data.ModData;
 import com.auto_farming.data.ModDataHolder;
 import com.auto_farming.data.SaveDataLoader;
+import com.auto_farming.inventory.HotbarSlot;
 import com.auto_farming.profiles.Profile;
 
 import me.shedaniel.autoconfig.AutoConfig;
@@ -75,6 +76,28 @@ public class ModConfig implements ConfigData {
 				.startBooleanToggle(Text.of("Enable Distracted Mood"), modData.getEnableDistracted())
 				.setDefaultValue(false)
 				.setSaveConsumer(modData::setEnableDistracted)
+				.build());
+
+		general.addEntry(entryBuilder
+				.startTextDescription(Text.of("Hotbarslots"))
+				.build());
+
+		general.addEntry(entryBuilder
+				.startEnumSelector(Text.of("Farmingtool Slot"), HotbarSlot.class, modData.getFarmingToolSlot())
+				.setDefaultValue(HotbarSlot.SLOT_1)
+				.setEnumNameProvider((slot) -> {
+					return Text.of(slot.toString());
+				})
+				.setSaveConsumer(modData::setFarmingToolSlot)
+				.build());
+
+		general.addEntry(entryBuilder
+				.startEnumSelector(Text.of("Fallback Slot"), HotbarSlot.class, modData.getFallbackSlot())
+				.setDefaultValue(HotbarSlot.SLOT_8)
+				.setEnumNameProvider((slot) -> {
+					return Text.of(slot.toString());
+				})
+				.setSaveConsumer(modData::setFallbackSlot)
 				.build());
 
 		general.addEntry(entryBuilder

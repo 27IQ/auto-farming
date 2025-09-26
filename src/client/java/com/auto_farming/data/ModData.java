@@ -6,6 +6,9 @@ import java.util.List;
 
 import com.auto_farming.AutofarmingClient;
 import com.auto_farming.actionwrapper.Actions;
+import com.auto_farming.inventory.HotbarSlot;
+
+import static com.auto_farming.inventory.HotbarSlot.*;
 import com.auto_farming.profiles.Profile;
 
 import static com.auto_farming.actionwrapper.Actions.WALK_LEFT;
@@ -30,6 +33,8 @@ public class ModData {
     private Boolean showPauseMessage = true;
     private Boolean forceAttentiveMood = false;
     private Boolean enableDistracted = false;
+    private HotbarSlot farmingToolSlot = SLOT_1;
+    private HotbarSlot fallbackSlot = SLOT_8;
 
     public void init() {
         AutofarmingClient.LOGGER.info("initialising moddata");
@@ -77,6 +82,9 @@ public class ModData {
         this.showPauseMessage = other.showPauseMessage;
         this.forceAttentiveMood = other.forceAttentiveMood;
         this.enableDistracted = other.enableDistracted;
+
+        this.farmingToolSlot = other.farmingToolSlot;
+        this.fallbackSlot = other.fallbackSlot;
     }
 
     public void setProfiles(List<Profile> profiles) {
@@ -124,6 +132,22 @@ public class ModData {
         return enableDistracted;
     }
 
+    public void setFarmingToolSlot(HotbarSlot farmingToolSlot) {
+        this.farmingToolSlot = farmingToolSlot;
+    }
+
+    public HotbarSlot getFarmingToolSlot() {
+        return farmingToolSlot;
+    }
+
+    public void setFallbackSlot(HotbarSlot fallbackSlot) {
+        this.fallbackSlot = fallbackSlot;
+    }
+
+    public HotbarSlot getFallbackSlot() {
+        return fallbackSlot;
+    }
+
     public static ModData cloneOf(ModData modData) {
         ModData clonedModData = new ModData();
         clonedModData.reload = modData.reload;
@@ -139,6 +163,9 @@ public class ModData {
         clonedModData.showPauseMessage = modData.showPauseMessage;
         clonedModData.forceAttentiveMood = modData.forceAttentiveMood;
         clonedModData.enableDistracted = modData.enableDistracted;
+
+        clonedModData.farmingToolSlot = modData.farmingToolSlot;
+        clonedModData.fallbackSlot = modData.fallbackSlot;
 
         return clonedModData;
     }
