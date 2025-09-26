@@ -1,4 +1,6 @@
-package com.auto_farming.farmprofiles;
+package com.auto_farming.profiles;
+
+import static com.auto_farming.misc.ThreadHelper.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -183,5 +185,19 @@ public class Profile {
         }
 
         return clonedProfiles;
+    }
+
+    public void profileSetUp() {
+        if (actionsStart.length == 0)
+            return;
+
+        for (Actions action : actionsStart) {
+            randomSleep(SHORT_DURATION);
+            action.activate();
+            randomSleep(LONG_DURATION);
+            action.deactivate();
+        }
+
+        randomSteapSleep(VERY_SHORT_DURATION);
     }
 }

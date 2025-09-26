@@ -7,7 +7,7 @@ import com.auto_farming.config.clothconfigextensions.DirtyFlag;
 import com.auto_farming.data.ModData;
 import com.auto_farming.data.ModDataHolder;
 import com.auto_farming.data.SaveDataLoader;
-import com.auto_farming.farmprofiles.Profile;
+import com.auto_farming.profiles.Profile;
 
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.ConfigData;

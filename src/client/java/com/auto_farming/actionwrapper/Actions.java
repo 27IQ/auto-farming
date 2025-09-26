@@ -1,6 +1,12 @@
 package com.auto_farming.actionwrapper;
 
+import static com.auto_farming.misc.RandNumberHelper.Random;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
+
+import com.auto_farming.AutofarmingClient;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
@@ -46,13 +52,13 @@ public enum Actions {
 
     public void activate() {
         this.active = true;
-        // AutofarmingClient.LOGGER.info(this.name().toLowerCase() + " activated");
+        AutofarmingClient.LOGGER.info(this.name().toLowerCase() + " activated");
     }
 
     public void deactivate() {
         this.active = false;
         this.stop = true;
-        // AutofarmingClient.LOGGER.info(this.name().toLowerCase() + " deactivated");
+        AutofarmingClient.LOGGER.info(this.name().toLowerCase() + " deactivated");
     }
 
     public static Actions[] cloneOf(Actions[] actions) {
@@ -72,5 +78,34 @@ public enum Actions {
         }
 
         return true;
+    }
+
+    public static Actions[] randomiseActionOrder(Actions[] actions) {
+
+        int min = 0;
+        int max = actions.length - 1;
+
+        List<Actions> results = new ArrayList<>();
+
+        while (results.size() < actions.length) {
+            int pull = Random(min, max);
+
+            if (results.size() == 0) {
+                results.add(actions[pull]);
+                continue;
+            }
+
+            boolean foundFlag = false;
+
+            for (Actions action : results) {
+                if (action == actions[pull])
+                    foundFlag = true;
+            }
+
+            if (!foundFlag)
+                results.add(actions[pull]);
+        }
+
+        return results.toArray(new Actions[0]);
     }
 }

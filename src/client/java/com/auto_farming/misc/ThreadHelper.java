@@ -7,14 +7,21 @@ import com.auto_farming.farminglogic.AutoFarmHolder;
 
 public class ThreadHelper {
 
-    public static final long SHORT_DURATION = 150, MEDIUM_DURATION = 300, LONG_DURATION = 500,
+    public static final long VERY_SHORT_DURATION = 75, SHORT_DURATION = 150, MEDIUM_DURATION = 300, LONG_DURATION = 500,
             VERY_LONG_DURATION = 1000;
+
+    public static void randomSteapSleep(long maxDuration) {
+        preciseSleep(Random(0, maxDuration));
+    }
 
     public static void randomSleep(long baseDuration) {
         preciseSleep(Random(baseDuration, (long) (baseDuration * 1.5)));
     }
 
     public static void preciseSleep(long ms) {
+        if (Thread.currentThread().isInterrupted())
+            return;
+
         long start = System.nanoTime();
         long end = start + ms * 1_000_000;
 
@@ -22,7 +29,7 @@ public class ThreadHelper {
             try {
                 Thread.sleep(ms - 15);
             } catch (InterruptedException e) {
-                AutofarmingClient.LOGGER.error(e.getMessage(), e);
+                AutofarmingClient.LOGGER.error(e.getMessage());
                 Thread.currentThread().interrupt();
                 return;
             }

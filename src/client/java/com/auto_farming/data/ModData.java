@@ -6,11 +6,12 @@ import java.util.List;
 
 import com.auto_farming.AutofarmingClient;
 import com.auto_farming.actionwrapper.Actions;
+import com.auto_farming.profiles.Profile;
 
 import static com.auto_farming.actionwrapper.Actions.WALK_LEFT;
 import static com.auto_farming.actionwrapper.Actions.WALK_RIGHT;
 import static com.auto_farming.actionwrapper.Actions.WALK_FORWARD;
-import com.auto_farming.farmprofiles.Profile;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class ModData {
