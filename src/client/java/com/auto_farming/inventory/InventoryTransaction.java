@@ -65,7 +65,7 @@ public abstract class InventoryTransaction extends InventoryTransactionHelper {
                 transaction.lastSuccess = System.nanoTime();
                 transaction.onSuccess();
             } catch (Exception e) {
-                AutofarmingClient.LOGGER.error(e.getMessage(), e);
+                AutofarmingClient.LOGGER.error(e.getMessage());
                 transaction.crashHandler(e);
                 transactionQueue.offer(transaction);
             }

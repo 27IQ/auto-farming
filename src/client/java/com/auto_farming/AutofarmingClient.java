@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.auto_farming.actionwrapper.Actions;
+import com.auto_farming.alerts.SoundAlert;
 import com.auto_farming.chat.Commands;
 import com.auto_farming.config.ModConfig;
 import com.auto_farming.event.EventManager;
@@ -28,6 +29,7 @@ public class AutofarmingClient implements ClientModInitializer {
 		InputHandler.register();
 		Commands.register();
 		Scoreboard.register();
+		SoundAlert.registerAll();
 
 		LOGGER.info("auto-farming loaded successfully");
 	}

@@ -1,0 +1,10 @@
+{
+    "mambo": {
+        "sounds": [
+            {
+                "name": "auto_farming:mambo",
+                "stream": true
+            }
+        ]
+    }
+}

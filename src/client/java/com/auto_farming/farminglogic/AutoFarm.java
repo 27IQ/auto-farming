@@ -13,6 +13,7 @@ import com.auto_farming.AutofarmingClient;
 import com.auto_farming.actionwrapper.Actions;
 import com.auto_farming.actionwrapper.Direction;
 import com.auto_farming.actionwrapper.MouseLocker;
+import com.auto_farming.alerts.SoundAlert;
 import com.auto_farming.data.ModData;
 import com.auto_farming.data.ModDataHolder;
 import com.auto_farming.event.EventManager;
@@ -178,17 +179,15 @@ public class AutoFarm extends Waiter {
         long duration = (System.nanoTime() - startTime) / 1_000_000;
         long sum = (walkedTime + pausedTime + otherDelays);
 
-        AutofarmingClient.LOGGER.info(
-                "projectedRowDuration: " + totalTime +
-                        "\nwalkedTime: " + walkedTime +
-                        "\nwalkedTimeDiff: " + (walkedTime - totalTime) +
-                        "\npausedTime: " + pausedTime +
-                        "\notherTimeWaited: " + otherDelays +
-                        "\nsum: " + sum +
-                        "\nprocessing%: "
-                        + ((((double) duration / (double) sum) - 1) * 100) + "%" +
-                        "\nintervalDuration: " + duration +
-                        "\nintervalDiff: " + (duration - sum));
+        AutofarmingClient.LOGGER.info("projectedRowDuration: " + totalTime);
+        AutofarmingClient.LOGGER.info("walkedTime: " + walkedTime);
+        AutofarmingClient.LOGGER.info("walkedTimeDiff: " + (walkedTime - totalTime));
+        AutofarmingClient.LOGGER.info("pausedTime: " + pausedTime);
+        AutofarmingClient.LOGGER.info("otherTimeWaited: " + otherDelays);
+        AutofarmingClient.LOGGER.info("sum: " + sum);
+        AutofarmingClient.LOGGER.info("processing%: " + ((((double) duration / (double) sum) - 1) * 100) + "%");
+        AutofarmingClient.LOGGER.info("intervalDuration: " + duration);
+        AutofarmingClient.LOGGER.info("intervalDiff: " + (duration - sum));
 
     }
 
@@ -302,6 +301,10 @@ public class AutoFarm extends Waiter {
     }
 
     public void handleDisrupts() {
+        if (farmingThread.isInterrupted() || disruptQueue.isEmpty())
+            return;
+
+        SoundAlert.MAMBO_ALERT.play();
         while (!farmingThread.isInterrupted() && !disruptQueue.isEmpty()) {
             nextDisrupt = false;
             StatusHUD.setMessage(disruptQueue.poll().getMessage());
@@ -312,6 +315,7 @@ public class AutoFarm extends Waiter {
 
             EventManager.trigger(new ForcePauseHandleEvent());
         }
+        SoundAlert.MAMBO_ALERT.stop();
     }
 
     /*

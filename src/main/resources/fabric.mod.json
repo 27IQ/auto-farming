@@ -12,7 +12,7 @@
 		"sources": "https://github.com/27IQ/auto-farming"
 	},
 	"license": "CC0-1.0",
-	"icon": "assets/auto-farming/icon.png",
+	"icon": "assets/auto_farming/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"client": [
