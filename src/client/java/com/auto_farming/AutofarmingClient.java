@@ -6,13 +6,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.auto_farming.actionwrapper.Actions;
-import com.auto_farming.alerts.SoundAlert;
 import com.auto_farming.chat.Commands;
 import com.auto_farming.config.ModConfig;
 import com.auto_farming.event.EventManager;
 import com.auto_farming.gui.HudHelper;
 import com.auto_farming.input.InputHandler;
 import com.auto_farming.scoreboard.Scoreboard;
+import com.auto_farming.sounds.SoundAlert;
 
 public class AutofarmingClient implements ClientModInitializer {
 	public static final String MOD_ID = "auto-farming";

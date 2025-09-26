@@ -35,6 +35,7 @@ public class ModData {
     private Boolean enableDistracted = false;
     private HotbarSlot farmingToolSlot = SLOT_1;
     private HotbarSlot fallbackSlot = SLOT_8;
+    private Boolean autoMuteSounds = true;
 
     public void init() {
         AutofarmingClient.LOGGER.info("initialising moddata");
@@ -85,6 +86,8 @@ public class ModData {
 
         this.farmingToolSlot = other.farmingToolSlot;
         this.fallbackSlot = other.fallbackSlot;
+
+        this.autoMuteSounds = other.autoMuteSounds;
     }
 
     public void setProfiles(List<Profile> profiles) {
@@ -148,6 +151,14 @@ public class ModData {
         return fallbackSlot;
     }
 
+    public void setAutoMuteSounds(Boolean autoMuteSounds) {
+        this.autoMuteSounds = autoMuteSounds;
+    }
+
+    public Boolean getAutoMuteSounds() {
+        return autoMuteSounds;
+    }
+
     public static ModData cloneOf(ModData modData) {
         ModData clonedModData = new ModData();
         clonedModData.reload = modData.reload;
@@ -166,6 +177,8 @@ public class ModData {
 
         clonedModData.farmingToolSlot = modData.farmingToolSlot;
         clonedModData.fallbackSlot = modData.fallbackSlot;
+
+        clonedModData.autoMuteSounds = modData.autoMuteSounds;
 
         return clonedModData;
     }

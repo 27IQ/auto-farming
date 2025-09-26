@@ -3,7 +3,8 @@
 	"package": "com.auto_farming.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
-		"MouseMixin"
+		"MouseMixin",
+		"SoundManagerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

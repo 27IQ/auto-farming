@@ -13,7 +13,6 @@ import com.auto_farming.AutofarmingClient;
 import com.auto_farming.actionwrapper.Actions;
 import com.auto_farming.actionwrapper.Direction;
 import com.auto_farming.actionwrapper.MouseLocker;
-import com.auto_farming.alerts.SoundAlert;
 import com.auto_farming.data.ModData;
 import com.auto_farming.data.ModDataHolder;
 import com.auto_farming.event.EventManager;
@@ -23,6 +22,8 @@ import com.auto_farming.inventory.HotbarSlot;
 import com.auto_farming.inventory.InventoryTransaction;
 import com.auto_farming.misc.MiscHelper;
 import com.auto_farming.moods.Mood;
+import com.auto_farming.sounds.AutoSoundMuter;
+import com.auto_farming.sounds.SoundAlert;
 
 public class AutoFarm extends Waiter {
     // Thread
@@ -70,6 +71,7 @@ public class AutoFarm extends Waiter {
     }
 
     private void onStart() {
+        AutoSoundMuter.activate();
         isPaused = false;
         isForcePaused = false;
         MouseLocker.lockMouse();
@@ -77,6 +79,7 @@ public class AutoFarm extends Waiter {
     }
 
     private void onClose() {
+        AutoSoundMuter.deactivate();
         MouseLocker.unlockMouse();
         StatusHUD.setMessage("");
         InventoryTransaction.clearQueue();
@@ -364,6 +367,10 @@ public class AutoFarm extends Waiter {
 
     public HotbarSlot getFallbackSlot() {
         return settings.getFallbackSlot();
+    }
+
+    public boolean getAutoMuteSounds() {
+        return settings.getAutoMuteSounds();
     }
 
     /*

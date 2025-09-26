@@ -1,4 +1,4 @@
-package com.auto_farming.alerts;
+package com.auto_farming.sounds;
 
 import com.auto_farming.AutofarmingClient;
 

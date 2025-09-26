@@ -101,6 +101,16 @@ public class ModConfig implements ConfigData {
 				.build());
 
 		general.addEntry(entryBuilder
+				.startTextDescription(Text.of("Sounds"))
+				.build());
+
+		general.addEntry(entryBuilder
+				.startBooleanToggle(Text.of("Automute Sounds"), modData.getAutoMuteSounds())
+				.setDefaultValue(true)
+				.setSaveConsumer(modData::setAutoMuteSounds)
+				.build());
+
+		general.addEntry(entryBuilder
 				.startTextDescription(Text.of("Profiles:"))
 				.build());
 
