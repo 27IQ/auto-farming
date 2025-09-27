@@ -1,6 +1,8 @@
 package com.auto_farming.actionwrapper;
 
 import static com.auto_farming.misc.RandNumberHelper.Random;
+import static com.auto_farming.misc.ThreadHelper.VERY_SHORT_DURATION;
+import static com.auto_farming.misc.ThreadHelper.randomSteapSleep;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,6 +59,17 @@ public enum Actions {
         this.active = false;
         this.stop = true;
         // AutofarmingClient.LOGGER.info(this.name().toLowerCase() + " deactivated");
+    }
+
+    public static void deactivateAll() {
+        for (Actions action : Actions.values()) {
+
+            if (!action.active)
+                continue;
+
+            randomSteapSleep(VERY_SHORT_DURATION);
+            action.deactivate();
+        }
     }
 
     public static Actions[] cloneOf(Actions[] actions) {

@@ -4,7 +4,6 @@ import static com.auto_farming.actionwrapper.Actions.LEFT_CLICK;
 import static com.auto_farming.actionwrapper.Direction.LEFT;
 import static com.auto_farming.actionwrapper.Direction.RIGHT;
 import static com.auto_farming.input.Bindings.PAUSE_TOGGLE;
-import static com.auto_farming.misc.RandNumberHelper.Random;
 import static com.auto_farming.misc.ThreadHelper.*;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -71,6 +70,7 @@ public class AutoFarm extends Waiter {
     }
 
     private void onStart() {
+        BlockBreakDetection.clearBpsQueue();
         AutoSoundMuter.activate();
         isPaused = false;
         isForcePaused = false;
@@ -83,6 +83,12 @@ public class AutoFarm extends Waiter {
         MouseLocker.unlockMouse();
         StatusHUD.setMessage("");
         InventoryTransaction.clearQueue();
+        BlockBreakDetection.stopDetection();
+        Actions.deactivateAll();
+    }
+
+    public boolean isPaused() {
+        return isPaused || isForcePaused;
     }
 
     public boolean isForcePaused() {
@@ -144,19 +150,16 @@ public class AutoFarm extends Waiter {
         resetDebug();
 
         long moodOvershoot = currentMood.getRandomMoodOvershoot(settings.isForceAttentiveMood());
-        long totalTime = getCurrentRowClearTime() + Random(0, 250) + moodOvershoot;
-
-        if (getCurrentRowClearTime() > totalTime) {
-            AutofarmingClient.LOGGER.error("RowClearTime got reduced! " + getCurrentRowClearTime() + "->" + totalTime
-                    + " overwriting totalTime");
-            totalTime = getCurrentRowClearTime();
-        }
+        long rowTime = getCurrentRowClearTime();
+        long totalTime = rowTime + moodOvershoot;
 
         activateCurrentActions();
 
         elapsedRowTime = 0;
 
-        plannedWait(totalTime, POLLING_INTERVAL, (chunkTime, waitingDuration) -> {
+        BlockBreakDetection.startDetection();
+
+        plannedWait(rowTime, POLLING_INTERVAL, (chunkTime, waitingDuration) -> {
             elapsedRowTime += chunkTime;
             walkedTime += chunkTime;
 
@@ -172,10 +175,29 @@ public class AutoFarm extends Waiter {
                     + "\nRow progress: " + Math.round(progress) + "%"
                     + "\nCurrent mood: " + currentMood.NAME
                     + "\nRow time: " + MiscHelper.getTimeStringFromMillis(waitingDuration)
-                    + "\nElapsed row time: " + MiscHelper.getTimeStringFromMillis(elapsedRowTime)
-                    + "\nMood Time: " + MiscHelper.getTimeStringFromMillis(currentMoodDuration)
-                    + "\nMood overshoot: " + MiscHelper.getTimeStringFromMillis(moodOvershoot));
+                    + "\nElapsed row time: " + MiscHelper.getTimeStringFromMillis(elapsedRowTime));
         });
+
+        BlockBreakDetection.stopDetection();
+
+        if (moodOvershoot != 0) {
+            plannedWait(moodOvershoot, POLLING_INTERVAL, (chunkTime, waitingDuration) -> {
+                elapsedRowTime += chunkTime;
+                walkedTime += chunkTime;
+
+                if (currentMoodDuration > 0) {
+                    currentMoodDuration -= chunkTime;
+                } else {
+                    switchMood();
+                }
+
+                StatusHUD.setMessage(settings.getCurrentProfile().name
+                        + "\nLayer " + (currentlayer + 1) + "/" + settings.getCurrentProfile().layerCount
+                        + "\nCurrent mood: " + currentMood.NAME
+                        + "\nOvershoot time: " + MiscHelper.getTimeStringFromMillis(waitingDuration)
+                        + "\nElapsed Overshoot time: " + MiscHelper.getTimeStringFromMillis(elapsedRowTime));
+            });
+        }
 
         deactivateCurrentActions();
 
@@ -247,14 +269,17 @@ public class AutoFarm extends Waiter {
         checkForcePauseEligible();
 
         if (isPaused || isForcePaused) {
+            BlockBreakDetection.stopDetection();
             AutofarmingClient.LOGGER.info("Pausing ...");
             MouseLocker.unlockMouse();
             deactivateCurrentActions();
+            Actions.deactivateAll();
             handlePauseState();
             AutofarmingClient.LOGGER.info("Unpausing ...");
             if (!farmingThread.isInterrupted()) {
                 activateCurrentActions();
                 MouseLocker.lockMouse();
+                BlockBreakDetection.startDetection();
             }
         }
     }
@@ -319,6 +344,7 @@ public class AutoFarm extends Waiter {
             EventManager.trigger(new ForcePauseHandleEvent());
         }
         SoundAlert.MAMBO_ALERT.stop();
+        BlockBreakDetection.clearBpsQueue();
     }
 
     /*
@@ -336,6 +362,9 @@ public class AutoFarm extends Waiter {
                 (currentMood.getRandomClickDelayMiss() ? VERY_SHORT_DURATION : MEDIUM_DURATION) + getMoodClickDelay());
 
         for (int i = 0; i < currentActionOrder.length; i++) {
+            if (currentActionOrder[i].isActive())
+                continue;
+
             currentActionOrder[i].activate();
             randomSteapSleep(SHORT_DURATION + getMoodClickDelay());
         }
@@ -347,6 +376,9 @@ public class AutoFarm extends Waiter {
         randomSteapSleep(VERY_SHORT_DURATION);
 
         for (int i = 0; i < currentActionOrder.length; i++) {
+            if (!currentActionOrder[i].isActive())
+                continue;
+
             currentActionOrder[i].deactivate();
             randomSteapSleep(VERY_SHORT_DURATION + getMoodClickDelay());
         }

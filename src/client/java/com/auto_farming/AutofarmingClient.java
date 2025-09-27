@@ -9,6 +9,7 @@ import com.auto_farming.actionwrapper.Actions;
 import com.auto_farming.chat.Commands;
 import com.auto_farming.config.ModConfig;
 import com.auto_farming.event.EventManager;
+import com.auto_farming.farminglogic.BlockBreakDetection;
 import com.auto_farming.gui.HudHelper;
 import com.auto_farming.input.InputHandler;
 import com.auto_farming.scoreboard.Scoreboard;
@@ -30,6 +31,7 @@ public class AutofarmingClient implements ClientModInitializer {
 		Commands.register();
 		Scoreboard.register();
 		SoundAlert.registerAll();
+		BlockBreakDetection.register();
 
 		LOGGER.info("auto-farming loaded successfully");
 	}
