@@ -5,7 +5,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.auto_farming.AutofarmingClient;
 import com.auto_farming.sounds.AutoSoundMuter;
 
 import net.minecraft.client.sound.SoundInstance;
@@ -20,8 +19,7 @@ public class SoundManagerMixin {
             return;
 
         if (soundInstance.getId() != null
-                && AutoSoundMuter.IDENTIFIER_SET.contains(soundInstance.getId().toString())) {
-            AutofarmingClient.LOGGER.info("found" + soundInstance.getId().toString());
+                && !AutoSoundMuter.IDENTIFIER_SET.contains(soundInstance.getId().toString())) {
             ci.cancel();
         }
     }

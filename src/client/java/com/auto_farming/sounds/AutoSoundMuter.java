@@ -8,32 +8,11 @@ import com.auto_farming.farminglogic.AutoFarmHolder;
 
 public class AutoSoundMuter {
 
-    public static final String[] MUTED_SOUNDS = new String[] {
-            "block.crop.break",
-            "block.crop.hit",
-            "block.nether_wart.break",
-            "block.nether_wart.hit",
-            "block.wood.break",
-            "block.wood.hit",
-            "block.cactus.break",
-            "block.cactus.hit",
-            "block.sugar_cane.break",
-            "block.sugar_cane.hit",
-            "block.fungus.break",
-            "block.fungus.hit",
-            "block.melon.break",
-            "block.melon.hit",
-            "block.pumpkin.break",
-            "block.pumpkin.hit",
-            "entity.experience_orb.pickup",
-            "block.wood.break"
-    };
-
     private static final Set<String> soundEventSet = new HashSet<>();
 
     static {
-        for (String event : MUTED_SOUNDS) {
-            soundEventSet.add("minecraft:" + event);
+        for (SoundAlert alert : SoundAlert.values()) {
+            soundEventSet.add(alert.getIdentifier().toString());
         }
     }
 

@@ -25,6 +25,10 @@ public enum SoundAlert {
         Registry.register(Registries.SOUND_EVENT, identifier, soundEvent);
     }
 
+    public Identifier getIdentifier() {
+        return identifier;
+    }
+
     public void play() {
         MinecraftClient client = MinecraftClient.getInstance();
         client.getSoundManager().play(
