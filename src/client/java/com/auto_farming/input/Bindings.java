@@ -15,7 +15,7 @@ public enum Bindings {
     @Override
     public String toString() {
 
-        String bindString = PAUSE_TOGGLE.bind.getBoundKeyTranslationKey().toString();
+        String bindString = bind.getBoundKeyTranslationKey().toString();
         String[] bindArr = bindString.split("\\.");
         return bindArr[bindArr.length - 1].toUpperCase();
     }
