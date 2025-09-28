@@ -4,6 +4,7 @@ import static com.auto_farming.actionwrapper.Actions.LEFT_CLICK;
 import static com.auto_farming.actionwrapper.Direction.LEFT;
 import static com.auto_farming.actionwrapper.Direction.RIGHT;
 import static com.auto_farming.input.Bindings.PAUSE_TOGGLE;
+import static com.auto_farming.misc.RandNumberHelper.Random;
 import static com.auto_farming.misc.ThreadHelper.*;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -31,7 +32,7 @@ public class AutoFarm extends Waiter {
     private ModData settings;
     private Direction startingDirection;
     // state
-    private long currentlayer;
+    private int currentLayer;
     private long elapsedRowTime = 0;
     private boolean isPaused = false;
     private boolean isForcePaused = false;
@@ -70,7 +71,7 @@ public class AutoFarm extends Waiter {
     }
 
     private void onStart() {
-        BlockBreakDetection.clearBpsQueue();
+        BlockBreakDetection.startDetection(settings.getBufferSize(), settings.getMinimumAverageBps());
         AutoSoundMuter.activate();
         isPaused = false;
         isForcePaused = false;
@@ -124,7 +125,7 @@ public class AutoFarm extends Waiter {
 
             currentDirection = startingDirection;
 
-            for (currentlayer = 0; currentlayer < settings.getCurrentProfile().layerCount; currentlayer++) {
+            for (currentLayer = 0; currentLayer < settings.getCurrentProfile().layerCount; currentLayer++) {
                 clearRow();
 
                 if (farmingThread.isInterrupted())
@@ -149,7 +150,8 @@ public class AutoFarm extends Waiter {
     private void clearRow() {
         resetDebug();
 
-        long moodOvershoot = currentMood.getRandomMoodOvershoot(settings.isForceAttentiveMood());
+        long moodOvershoot = settings.getCurrentProfile().layerCount == currentLayer + 1 ? 0
+                : Random(200, 500) + currentMood.getRandomMoodOvershoot(settings.isForceAttentiveMood());
         long rowTime = getCurrentRowClearTime();
         long totalTime = rowTime + moodOvershoot;
 
@@ -157,7 +159,7 @@ public class AutoFarm extends Waiter {
 
         elapsedRowTime = 0;
 
-        BlockBreakDetection.startDetection();
+        BlockBreakDetection.unpause();
 
         plannedWait(rowTime, POLLING_INTERVAL, (chunkTime, waitingDuration) -> {
             elapsedRowTime += chunkTime;
@@ -171,14 +173,14 @@ public class AutoFarm extends Waiter {
 
             double progress = ((double) elapsedRowTime / waitingDuration) * 100;
             StatusHUD.setMessage(settings.getCurrentProfile().name
-                    + "\nLayer " + (currentlayer + 1) + "/" + settings.getCurrentProfile().layerCount
+                    + "\nLayer " + (currentLayer + 1) + "/" + settings.getCurrentProfile().layerCount
                     + "\nRow progress: " + Math.round(progress) + "%"
                     + "\nCurrent mood: " + currentMood.NAME
                     + "\nRow time: " + MiscHelper.getTimeStringFromMillis(waitingDuration)
                     + "\nElapsed row time: " + MiscHelper.getTimeStringFromMillis(elapsedRowTime));
         });
 
-        BlockBreakDetection.stopDetection();
+        BlockBreakDetection.pause();
 
         if (moodOvershoot != 0) {
             plannedWait(moodOvershoot, POLLING_INTERVAL, (chunkTime, waitingDuration) -> {
@@ -192,11 +194,13 @@ public class AutoFarm extends Waiter {
                 }
 
                 StatusHUD.setMessage(settings.getCurrentProfile().name
-                        + "\nLayer " + (currentlayer + 1) + "/" + settings.getCurrentProfile().layerCount
+                        + "\nLayer " + (currentLayer + 1) + "/" + settings.getCurrentProfile().layerCount
                         + "\nCurrent mood: " + currentMood.NAME
                         + "\nOvershoot time: " + MiscHelper.getTimeStringFromMillis(waitingDuration)
                         + "\nElapsed Overshoot time: " + MiscHelper.getTimeStringFromMillis(elapsedRowTime));
             });
+        } else {
+            randomSteapSleep(MEDIUM_DURATION);
         }
 
         deactivateCurrentActions();
@@ -269,7 +273,6 @@ public class AutoFarm extends Waiter {
         checkForcePauseEligible();
 
         if (isPaused || isForcePaused) {
-            BlockBreakDetection.stopDetection();
             AutofarmingClient.LOGGER.info("Pausing ...");
             MouseLocker.unlockMouse();
             deactivateCurrentActions();
@@ -279,7 +282,6 @@ public class AutoFarm extends Waiter {
             if (!farmingThread.isInterrupted()) {
                 activateCurrentActions();
                 MouseLocker.lockMouse();
-                BlockBreakDetection.startDetection();
             }
         }
     }
@@ -344,7 +346,7 @@ public class AutoFarm extends Waiter {
             EventManager.trigger(new ForcePauseHandleEvent());
         }
         SoundAlert.MAMBO_ALERT.stop();
-        BlockBreakDetection.clearBpsQueue();
+        BlockBreakDetection.clearQueue();
     }
 
     /*

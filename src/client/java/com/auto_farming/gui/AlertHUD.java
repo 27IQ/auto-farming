@@ -46,7 +46,7 @@ public final class AlertHUD {
         int textWidth = client.textRenderer.getWidth(alertMessage);
 
         int x = (screenWidth - textWidth) / 2;
-        int y = (screenHeight / 2) - (client.textRenderer.fontHeight / 2);
+        int y = ((int) (screenHeight * 0.3)) - (client.textRenderer.fontHeight / 2);
 
         context.drawTextWithShadow(client.textRenderer, alertMessage, x, y, 0xFF0000);
     }

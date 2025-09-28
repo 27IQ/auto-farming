@@ -13,9 +13,17 @@ import net.minecraft.util.Identifier;
 public final class TopStatusHUD {
 
     private static String message = "";
+    private static boolean isEnabled = false;
 
     public static void setMessage(String hudMessage) {
-        message = AutoFarmHolder.get().isEmpty() ? "" : hudMessage;
+        if (isEnabled)
+            message = AutoFarmHolder.get().isEmpty() ? "" : hudMessage;
+    }
+
+    public static void setEnabled(boolean isEnabled) {
+        TopStatusHUD.isEnabled = isEnabled;
+        if (!isEnabled)
+            message = "";
     }
 
     public static void register() {

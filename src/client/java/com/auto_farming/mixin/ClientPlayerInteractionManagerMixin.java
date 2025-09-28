@@ -15,7 +15,7 @@ public class ClientPlayerInteractionManagerMixin {
     @Inject(method = "breakBlock", at = @At("RETURN"))
     private void onBreakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
         if (cir.getReturnValue()) {
-            BlockBreakDetection.incrementCounter();
+            BlockBreakDetection.incrementBlockCounter();
         }
     }
 }

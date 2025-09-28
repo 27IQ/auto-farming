@@ -5,6 +5,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import com.auto_farming.farminglogic.BlockBreakDetection;
 import com.auto_farming.sounds.AutoSoundMuter;
 
 import net.minecraft.client.sound.SoundInstance;
@@ -15,6 +16,11 @@ public class SoundManagerMixin {
 
     @Inject(method = "play", at = @At("HEAD"), cancellable = true)
     public void onPlay(SoundInstance soundInstance, CallbackInfo ci) {
+        if (soundInstance.getId() != null
+                && soundInstance.getId().toString().equals("minecraft:entity.experience_orb.pickup")) {
+            BlockBreakDetection.incrementXpSoundCounter();
+        }
+
         if (!AutoSoundMuter.isSoundMuted())
             return;
 

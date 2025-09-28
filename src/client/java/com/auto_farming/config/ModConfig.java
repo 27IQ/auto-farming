@@ -111,6 +111,22 @@ public class ModConfig implements ConfigData {
 				.build());
 
 		general.addEntry(entryBuilder
+				.startTextDescription(Text.of("Block Break Detection"))
+				.build());
+
+		general.addEntry(entryBuilder
+				.startIntField(Text.of("Buffer Size"), modData.getBufferSize())
+				.setDefaultValue(5)
+				.setSaveConsumer(modData::setBufferSize)
+				.build());
+
+		general.addEntry(entryBuilder
+				.startIntField(Text.of("Minimum Average Bps"), modData.getMinimumAverageBps())
+				.setDefaultValue(10)
+				.setSaveConsumer(modData::setMinimumAverageBps)
+				.build());
+
+		general.addEntry(entryBuilder
 				.startTextDescription(Text.of("Profiles:"))
 				.build());
 

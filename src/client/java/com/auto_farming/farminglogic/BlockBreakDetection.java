@@ -1,46 +1,58 @@
 package com.auto_farming.farminglogic;
 
+import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import static com.auto_farming.input.Bindings.PAUSE_TOGGLE;
 
+import com.auto_farming.AutofarmingClient;
+import com.auto_farming.gui.AlertHUD;
 import com.auto_farming.gui.TopStatusHUD;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 
 public class BlockBreakDetection {
-    private static int counter = 0;
-    private static int tickCounterBps = 0;
-    private static int tickCounterDetect = 0;
-    private static Queue<Integer> bpsQueue = new ConcurrentLinkedQueue<>();
-    private static boolean isActive = false;
+    private static int blockCounter = 0;
+    private static int xpSoundCounter = 0;
+    private static int tickCounterDetect;
+    private static Queue<Integer> bpsBlockQueue = new ConcurrentLinkedQueue<>();
+    private static Queue<Integer> bpsSoundQueue = new ConcurrentLinkedQueue<>();
+    private static boolean isActive;
+    private static int bufferSize;
+    private static int minimumBps;
+    private static boolean isRampedUp;
 
-    public static void incrementCounter() {
-        counter++;
+    public static void incrementBlockCounter() {
+        blockCounter++;
     }
 
-    private static void registerCalculateBlockPerSecond() {
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            tickCounterBps++;
-
-            if (tickCounterBps < 20)
-                return;
-
-            tickCounterBps = 0;
-            TopStatusHUD.setMessage("Block/s: " + counter);
-        });
+    public static void incrementXpSoundCounter() {
+        xpSoundCounter++;
     }
 
-    public static final int MAXIMUM_LOSS_DURATION = 7; // seconds
-    public static final int MINIMUM_BPS = 10;
-
-    public static void startDetection() {
-        counter = 0;
-        isActive = true;
+    public static void startDetection(int bufferSize, int minimumBps) {
+        blockCounter = 0;
+        xpSoundCounter = 0;
+        tickCounterDetect = 0;
+        BlockBreakDetection.minimumBps = minimumBps;
+        BlockBreakDetection.bufferSize = bufferSize;
+        isActive = false;
+        TopStatusHUD.setEnabled(true);
+        isRampedUp = false;
+        clearQueue();
     }
 
     public static void stopDetection() {
         isActive = false;
+        TopStatusHUD.setEnabled(false);
+    }
+
+    public static void pause() {
+        isActive = false;
+    }
+
+    public static void unpause() {
+        isActive = true;
     }
 
     private static void registerDetectBlockBreakingLoss() {
@@ -52,38 +64,65 @@ public class BlockBreakDetection {
 
             tickCounterDetect = 0;
 
-            if (!isActive)
+            Optional<AutoFarm> autoFarm = AutoFarmHolder.get();
+
+            if (!isActive || autoFarm.isEmpty() || autoFarm.get().isPaused())
                 return;
 
-            bpsQueue.offer(counter);
-            counter = 0;
+            bpsBlockQueue.offer(blockCounter);
+            bpsSoundQueue.offer(xpSoundCounter);
+            blockCounter = 0;
+            xpSoundCounter = 0;
 
-            if (bpsQueue.size() <= MAXIMUM_LOSS_DURATION)
+            if (bpsBlockQueue.size() <= bufferSize && bpsSoundQueue.size() <= bufferSize)
                 return;
 
-            bpsQueue.poll();
+            bpsBlockQueue.poll();
+            bpsSoundQueue.poll();
 
-            double sum = 0;
+            double blockSum = 0;
+            double xpSum = 0;
 
-            for (Integer integer : bpsQueue) {
-                sum += integer;
+            for (Integer bps : bpsBlockQueue) {
+                blockSum += bps;
             }
 
-            if ((sum / MAXIMUM_LOSS_DURATION) < MINIMUM_BPS) {
+            for (Integer bps : bpsSoundQueue) {
+                xpSum += bps;
+            }
+
+            double blockAvg = blockSum / bufferSize;
+            double xpAvg = xpSum / bufferSize;
+
+            if (!isRampedUp && (blockAvg >= minimumBps && xpAvg >= minimumBps)) {
+                isRampedUp = true;
+                AutofarmingClient.LOGGER.info("Detection has ramped up! " + blockAvg + "/" + xpAvg);
+                AlertHUD.setMessage("Detection has ramped up!", 2000);
+            } else if (!isRampedUp) {
+                TopStatusHUD.setMessage("Ramping ... " + blockAvg + "/" + xpAvg);
+                return;
+            }
+
+            if (isRampedUp && (blockAvg < minimumBps || xpAvg < minimumBps)) {
+                isRampedUp = false;
                 AutoFarmHolder.get().ifPresent((farm) -> {
+                    AutofarmingClient.LOGGER
+                            .error("bps error :" + blockAvg + "/" + xpAvg);
                     farm.queueDisrupt(new FarmingDisrupt(
                             "You are breaking no Blocks!\nResume with " + PAUSE_TOGGLE.toString()));
                 });
             }
+
+            TopStatusHUD.setMessage("Blocks/s: " + blockAvg + "/" + xpAvg);
         });
     }
 
-    public static void clearBpsQueue() {
-        bpsQueue.clear();
+    public static void clearQueue() {
+        bpsBlockQueue.clear();
+        bpsSoundQueue.clear();
     }
 
     public static void register() {
-        registerCalculateBlockPerSecond();
         registerDetectBlockBreakingLoss();
     }
 }

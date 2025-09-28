@@ -36,6 +36,8 @@ public class ModData {
     private HotbarSlot farmingToolSlot = SLOT_1;
     private HotbarSlot fallbackSlot = SLOT_8;
     private Boolean autoMuteSounds = true;
+    private Integer bufferSize = 5;
+    private Integer minimumAverageBps = 10;
 
     public void init() {
         AutofarmingClient.LOGGER.info("initialising moddata");
@@ -88,6 +90,9 @@ public class ModData {
         this.fallbackSlot = other.fallbackSlot;
 
         this.autoMuteSounds = other.autoMuteSounds;
+
+        this.bufferSize = other.bufferSize;
+        this.minimumAverageBps = other.minimumAverageBps;
     }
 
     public void setProfiles(List<Profile> profiles) {
@@ -159,6 +164,22 @@ public class ModData {
         return autoMuteSounds;
     }
 
+    public Integer getBufferSize() {
+        return bufferSize;
+    }
+
+    public void setBufferSize(Integer bufferSize) {
+        this.bufferSize = bufferSize;
+    }
+
+    public Integer getMinimumAverageBps() {
+        return minimumAverageBps;
+    }
+
+    public void setMinimumAverageBps(Integer minimumAverageBps) {
+        this.minimumAverageBps = minimumAverageBps;
+    }
+
     public static ModData cloneOf(ModData modData) {
         ModData clonedModData = new ModData();
         clonedModData.reload = modData.reload;
@@ -179,6 +200,9 @@ public class ModData {
         clonedModData.fallbackSlot = modData.fallbackSlot;
 
         clonedModData.autoMuteSounds = modData.autoMuteSounds;
+
+        clonedModData.bufferSize = modData.bufferSize;
+        clonedModData.minimumAverageBps = modData.minimumAverageBps;
 
         return clonedModData;
     }
