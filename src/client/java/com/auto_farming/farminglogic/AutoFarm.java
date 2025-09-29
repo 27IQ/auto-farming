@@ -3,11 +3,8 @@ package com.auto_farming.farminglogic;
 import static com.auto_farming.actionwrapper.Actions.LEFT_CLICK;
 import static com.auto_farming.actionwrapper.Direction.LEFT;
 import static com.auto_farming.actionwrapper.Direction.RIGHT;
-import static com.auto_farming.input.Bindings.PAUSE_TOGGLE;
 import static com.auto_farming.misc.RandNumberHelper.Random;
 import static com.auto_farming.misc.ThreadHelper.*;
-
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.auto_farming.AutofarmingClient;
 import com.auto_farming.actionwrapper.Actions;
@@ -15,45 +12,36 @@ import com.auto_farming.actionwrapper.Direction;
 import com.auto_farming.actionwrapper.MouseLocker;
 import com.auto_farming.data.ModData;
 import com.auto_farming.data.ModDataHolder;
-import com.auto_farming.event.EventManager;
-import com.auto_farming.event.events.mainevents.ForcePauseHandleEvent;
+import com.auto_farming.farminglogic.autofarmextensions.BlockBreakDetection;
+import com.auto_farming.farminglogic.waiter.PauseableDisruptWaiter;
 import com.auto_farming.gui.StatusHUD;
 import com.auto_farming.inventory.HotbarSlot;
 import com.auto_farming.inventory.InventoryTransaction;
 import com.auto_farming.misc.MiscHelper;
 import com.auto_farming.moods.Mood;
 import com.auto_farming.sounds.AutoSoundMuter;
-import com.auto_farming.sounds.SoundAlert;
 
-public class AutoFarm extends Waiter {
-    // Thread
-    private Thread farmingThread;
+public class AutoFarm extends PauseableDisruptWaiter {
+
     // profile
     private ModData settings;
     private Direction startingDirection;
     // state
     private int currentLayer;
     private long elapsedRowTime = 0;
-    private boolean isPaused = false;
-    private boolean isForcePaused = false;
     private Direction currentDirection;
-    private ConcurrentLinkedQueue<FarmingDisrupt> disruptQueue;
-    private boolean nextDisrupt = false;
     // polling
-    private final long POLLING_INTERVAL = 100;
     // moods
     private Mood currentMood;
     private long currentMoodDuration = 0;
     // debugging
     private long otherDelays = 0;
     private long walkedTime = 0;
-    private long pausedTime = 0;
     private long startTime = 0;
 
     public AutoFarm() {
         super();
         settings = ModData.cloneOf(ModDataHolder.DATA);
-        disruptQueue = new ConcurrentLinkedQueue<>();
         switchMood();
     }
 
@@ -73,8 +61,8 @@ public class AutoFarm extends Waiter {
     private void onStart() {
         BlockBreakDetection.startDetection(settings.getBufferSize(), settings.getMinimumAverageBps());
         AutoSoundMuter.activate();
-        isPaused = false;
-        isForcePaused = false;
+        setPaused(false);
+        setForcePaused(false);
         MouseLocker.lockMouse();
         settings.getCurrentProfile().profileSetUp();
     }
@@ -86,29 +74,6 @@ public class AutoFarm extends Waiter {
         InventoryTransaction.clearQueue();
         BlockBreakDetection.stopDetection();
         Actions.deactivateAll();
-    }
-
-    public boolean isPaused() {
-        return isPaused || isForcePaused;
-    }
-
-    public boolean isForcePaused() {
-        return isForcePaused;
-    }
-
-    public void pauseToggle() {
-
-        if (farmingThread.isInterrupted() || isForcePaused)
-            return;
-
-        isPaused = !isPaused;
-        AutofarmingClient.LOGGER.info("isPaused: " + isPaused);
-
-        if (MouseLocker.isMouseLocked()) {
-            MouseLocker.lockMouse();
-        } else {
-            MouseLocker.unlockMouse();
-        }
     }
 
     /*
@@ -249,104 +214,21 @@ public class AutoFarm extends Waiter {
 
     /*
      * 
-     * Timing
-     * 
-     */
-
-    @Override
-    protected void beforeChunk() {
-        checkPause();
-    }
-
-    @Override
-    protected void afterChunk() {
-        checkPause();
-    }
-
-    /*
-     * 
      * Pausing
      * 
      */
 
-    private void checkPause() {
-        checkForcePauseEligible();
-
-        if (isPaused || isForcePaused) {
-            AutofarmingClient.LOGGER.info("Pausing ...");
-            MouseLocker.unlockMouse();
-            deactivateCurrentActions();
-            Actions.deactivateAll();
-            handlePauseState();
-            AutofarmingClient.LOGGER.info("Unpausing ...");
-            if (!farmingThread.isInterrupted()) {
-                activateCurrentActions();
-                MouseLocker.lockMouse();
-            }
-        }
+    @Override
+    protected void onPause() {
+        MouseLocker.unlockMouse();
+        deactivateCurrentActions();
+        Actions.deactivateAll();
     }
 
-    private void checkForcePauseEligible() {
-        if (!InventoryTransaction.isQueueEmpty() || !disruptQueue.isEmpty()) {
-            isForcePaused = true;
-            AutofarmingClient.LOGGER
-                    .info("InventoryTransactionQueue: " + InventoryTransaction.queueSize() + " Objects in queue");
-            AutofarmingClient.LOGGER.info("DisruptQueue: " + disruptQueue.size() + " Objects in queue");
-        }
-    }
-
-    private void handlePauseState() {
-        long pauseStart = System.nanoTime();
-
-        while (!farmingThread.isInterrupted() && (isPaused || isForcePaused)) {
-            if (isPaused && settings.isShowPauseMessage()) {
-                StatusHUD.setMessage("PAUSED - Press " + PAUSE_TOGGLE.toString() + " to resume");
-            } else if (isForcePaused && settings.isShowPauseMessage()) {
-                EventManager.trigger(new ForcePauseHandleEvent());
-            }
-
-            handleDisrupts();
-
-            isForcePaused = false;
-
-            waitFor(POLLING_INTERVAL);
-        }
-
-        pausedTime += (System.nanoTime() - pauseStart) / 1_000_000;
-    }
-
-    /*
-     * 
-     * Disrupts
-     * 
-     */
-
-    public void nextDisrupt() {
-        nextDisrupt = true;
-    }
-
-    public void queueDisrupt(FarmingDisrupt disrupt) {
-        AutofarmingClient.LOGGER.info("Queuing disrupt: " + disrupt.getMessage());
-        disruptQueue.offer(disrupt);
-    }
-
-    public void handleDisrupts() {
-        if (farmingThread.isInterrupted() || disruptQueue.isEmpty())
-            return;
-
-        SoundAlert.MAMBO_ALERT.play();
-        while (!farmingThread.isInterrupted() && !disruptQueue.isEmpty()) {
-            nextDisrupt = false;
-            StatusHUD.setMessage(disruptQueue.poll().getMessage());
-
-            while (!farmingThread.isInterrupted() && !nextDisrupt) {
-                waitFor(POLLING_INTERVAL);
-            }
-
-            EventManager.trigger(new ForcePauseHandleEvent());
-        }
-        SoundAlert.MAMBO_ALERT.stop();
-        BlockBreakDetection.clearQueue();
+    @Override
+    protected void onUnpause() {
+        activateCurrentActions();
+        MouseLocker.lockMouse();
     }
 
     /*
@@ -405,6 +287,10 @@ public class AutoFarm extends Waiter {
 
     public boolean getAutoMuteSounds() {
         return settings.getAutoMuteSounds();
+    }
+
+    public int getMaximumPestNumber() {
+        return settings.getMaximumPestNumber();
     }
 
     /*

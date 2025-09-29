@@ -38,6 +38,7 @@ public class ModData {
     private Boolean autoMuteSounds = true;
     private Integer bufferSize = 5;
     private Integer minimumAverageBps = 10;
+    private Integer maximumPestNumber = 4;
 
     public void init() {
         AutofarmingClient.LOGGER.info("initialising moddata");
@@ -93,6 +94,8 @@ public class ModData {
 
         this.bufferSize = other.bufferSize;
         this.minimumAverageBps = other.minimumAverageBps;
+
+        this.maximumPestNumber = other.maximumPestNumber;
     }
 
     public void setProfiles(List<Profile> profiles) {
@@ -180,6 +183,14 @@ public class ModData {
         this.minimumAverageBps = minimumAverageBps;
     }
 
+    public Integer getMaximumPestNumber() {
+        return maximumPestNumber;
+    }
+
+    public void setMaximumPestNumber(Integer maximumPestNumber) {
+        this.maximumPestNumber = maximumPestNumber;
+    }
+
     public static ModData cloneOf(ModData modData) {
         ModData clonedModData = new ModData();
         clonedModData.reload = modData.reload;
@@ -203,6 +214,8 @@ public class ModData {
 
         clonedModData.bufferSize = modData.bufferSize;
         clonedModData.minimumAverageBps = modData.minimumAverageBps;
+
+        clonedModData.maximumPestNumber = modData.maximumPestNumber;
 
         return clonedModData;
     }

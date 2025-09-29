@@ -6,7 +6,9 @@ import java.util.regex.Pattern;
 public enum RegexPattern {
     PEST_REPELLENT_MAX_PATTERN("Repellent: MAX\\s\\(\\d+[\\w\\s]+\\)"),
     PEST_REPELLENT_REGULAR_PATTERN("Repellent: Regular\\s\\(\\d+[\\w\\s]+\\)"),
-    PEST_REPELLENT_NONE_PATTERN("Repellent: None");
+    PEST_REPELLENT_NONE_PATTERN("Repellent: None"),
+
+    PEST_ALIVE_PATTERN("Alive:\\s(\\d+)");
 
     private final Pattern pattern;
 

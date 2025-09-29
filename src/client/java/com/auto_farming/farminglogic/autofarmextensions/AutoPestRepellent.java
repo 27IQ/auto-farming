@@ -1,4 +1,4 @@
-package com.auto_farming.farminglogic;
+package com.auto_farming.farminglogic.autofarmextensions;
 
 import static com.auto_farming.scoreboard.RegexPattern.PEST_REPELLENT_NONE_PATTERN;
 import static com.auto_farming.scoreboard.RegexPattern.PEST_REPELLENT_REGULAR_PATTERN;

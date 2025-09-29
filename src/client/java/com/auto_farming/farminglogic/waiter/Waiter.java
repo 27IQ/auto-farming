@@ -1,10 +1,15 @@
-package com.auto_farming.farminglogic;
+package com.auto_farming.farminglogic.waiter;
 
 import java.util.function.BiConsumer;
 
 import com.auto_farming.AutofarmingClient;
 
 public abstract class Waiter {
+
+    protected static final long POLLING_INTERVAL = 100;
+    protected Thread farmingThread;
+
+    protected long pausedTime = 0;
 
     public Waiter() {
     }
@@ -33,11 +38,11 @@ public abstract class Waiter {
         return actualSleep;
     }
 
-    protected abstract void beforeChunk();
+    public abstract void beforeChunk();
 
-    protected abstract void afterChunk();
+    public abstract void afterChunk();
 
-    protected long waitFor(long durationMillis) {
+    protected static long waitFor(long durationMillis) {
         long sleepStart = System.nanoTime();
 
         try {

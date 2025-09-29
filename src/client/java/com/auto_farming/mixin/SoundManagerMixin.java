@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.auto_farming.farminglogic.BlockBreakDetection;
+import com.auto_farming.farminglogic.autofarmextensions.BlockBreakDetection;
 import com.auto_farming.sounds.AutoSoundMuter;
 
 import net.minecraft.client.sound.SoundInstance;

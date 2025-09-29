@@ -1,11 +1,10 @@
 package com.auto_farming.inventory.transactions;
 
 import com.auto_farming.farminglogic.AutoFarmHolder;
-import com.auto_farming.farminglogic.FarmingDisrupt;
+import com.auto_farming.farminglogic.disrupt.Disrupt;
 import com.auto_farming.inventory.InventoryTransaction;
 import com.auto_farming.inventory.transactionhelper.ItemNotInInventoryException;
 import static com.auto_farming.skyblock.SkyBlockItem.PEST_REPELLENT_MAX;
-import static com.auto_farming.input.Bindings.PAUSE_TOGGLE;
 
 public final class AutoPestRepellentTransaction extends InventoryTransaction {
 
@@ -31,9 +30,7 @@ public final class AutoPestRepellentTransaction extends InventoryTransaction {
     protected void crashHandler(Exception e) {
         if (e instanceof ItemNotInInventoryException) {
             AutoFarmHolder.get().ifPresent((farm) -> {
-                farm.queueDisrupt(
-                        new FarmingDisrupt("Please add a " + PEST_REPELLENT_MAX.NAME
-                                + " to your inventory and resume with " + PAUSE_TOGGLE.toString() + "!"));
+                farm.queueDisruptIfAbesent(Disrupt.NO_PEST_REPELLENT_IN_INVENTORY);
             });
         }
     }

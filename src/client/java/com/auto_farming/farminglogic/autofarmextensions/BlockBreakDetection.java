@@ -1,11 +1,15 @@
-package com.auto_farming.farminglogic;
+package com.auto_farming.farminglogic.autofarmextensions;
 
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import static com.auto_farming.input.Bindings.PAUSE_TOGGLE;
 
 import com.auto_farming.AutofarmingClient;
+import com.auto_farming.event.annotations.Event;
+import com.auto_farming.event.events.mainevents.AfterDisruptEvent;
+import com.auto_farming.farminglogic.AutoFarm;
+import com.auto_farming.farminglogic.AutoFarmHolder;
+import com.auto_farming.farminglogic.disrupt.Disrupt;
 import com.auto_farming.gui.AlertHUD;
 import com.auto_farming.gui.TopStatusHUD;
 
@@ -108,13 +112,17 @@ public class BlockBreakDetection {
                 AutoFarmHolder.get().ifPresent((farm) -> {
                     AutofarmingClient.LOGGER
                             .error("bps error :" + blockAvg + "/" + xpAvg);
-                    farm.queueDisrupt(new FarmingDisrupt(
-                            "You are breaking no Blocks!\nResume with " + PAUSE_TOGGLE.toString()));
+                    farm.queueDisruptIfAbesent(Disrupt.BLOCK_BREAK_ALERT_DISRUPT);
                 });
             }
 
             TopStatusHUD.setMessage("Blocks/s: " + blockAvg + "/" + xpAvg);
         });
+    }
+
+    @Event(AfterDisruptEvent.class)
+    public static void clearQueue(AfterDisruptEvent event) {
+        clearQueue();
     }
 
     public static void clearQueue() {
