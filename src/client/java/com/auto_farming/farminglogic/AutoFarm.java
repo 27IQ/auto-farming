@@ -5,6 +5,7 @@ import static com.auto_farming.actionwrapper.Direction.LEFT;
 import static com.auto_farming.actionwrapper.Direction.RIGHT;
 import static com.auto_farming.misc.RandNumberHelper.Random;
 import static com.auto_farming.misc.ThreadHelper.*;
+import static com.auto_farming.farminglogic.AutoFarmState.*;
 
 import com.auto_farming.AutofarmingClient;
 import com.auto_farming.actionwrapper.Actions;
@@ -27,6 +28,7 @@ public class AutoFarm extends PauseableDisruptWaiter {
     private ModData settings;
     private Direction startingDirection;
     // state
+    private AutoFarmState currentState;
     private int currentLayer;
     private long elapsedRowTime = 0;
     private Direction currentDirection;
@@ -41,6 +43,7 @@ public class AutoFarm extends PauseableDisruptWaiter {
 
     public AutoFarm() {
         super();
+        currentState = DISABLED;
         settings = ModData.cloneOf(ModDataHolder.DATA);
         switchMood();
     }
@@ -68,6 +71,7 @@ public class AutoFarm extends PauseableDisruptWaiter {
     }
 
     private void onClose() {
+        currentState = DISABLED;
         AutoSoundMuter.deactivate();
         MouseLocker.unlockMouse();
         StatusHUD.setMessage("");
@@ -91,13 +95,16 @@ public class AutoFarm extends PauseableDisruptWaiter {
             currentDirection = startingDirection;
 
             for (currentLayer = 0; currentLayer < settings.getCurrentProfile().layerCount; currentLayer++) {
+                currentState = ROW;
                 clearRow();
 
                 if (farmingThread.isInterrupted())
                     break;
 
-                if (settings.getCurrentProfile().layerSwapTime != 0)
+                if (settings.getCurrentProfile().layerSwapTime != 0) {
+                    currentState = LAYER_SWAP;
                     layerSwap();
+                }
 
                 toggleDirection();
             }
@@ -105,7 +112,13 @@ public class AutoFarm extends PauseableDisruptWaiter {
             if (farmingThread.isInterrupted())
                 break;
 
+            currentState = VOID_DROP;
             handleVoidDrop();
+
+            if (farmingThread.isInterrupted())
+                break;
+
+            currentState = DISABLED;
             settings.getCurrentProfile().profileSetUp();
         }
 
@@ -220,9 +233,8 @@ public class AutoFarm extends PauseableDisruptWaiter {
 
     @Override
     protected void onPause() {
-        MouseLocker.unlockMouse();
         deactivateCurrentActions();
-        Actions.deactivateAll();
+        MouseLocker.unlockMouse();
     }
 
     @Override
@@ -238,7 +250,7 @@ public class AutoFarm extends PauseableDisruptWaiter {
      */
 
     private void activateCurrentActions() {
-        Actions[] currentActionOrder = Actions.randomiseActionOrder(getCurrentDirectionActions());
+        Actions[] currentActionOrder = Actions.randomiseActionOrder(getCurrentActions());
 
         randomSteapSleep(VERY_SHORT_DURATION);
         LEFT_CLICK.activate();
@@ -255,7 +267,8 @@ public class AutoFarm extends PauseableDisruptWaiter {
     }
 
     private void deactivateCurrentActions() {
-        Actions[] currentActionOrder = Actions.randomiseActionOrder(getCurrentDirectionActions());
+
+        Actions[] currentActionOrder = Actions.randomiseActionOrder(getCurrentActions());
 
         randomSteapSleep(VERY_SHORT_DURATION);
 
@@ -304,9 +317,25 @@ public class AutoFarm extends PauseableDisruptWaiter {
                 : settings.getCurrentProfile().rightRowClearTime;
     }
 
-    private Actions[] getCurrentDirectionActions() {
-        return currentDirection == LEFT ? settings.getCurrentProfile().actionsLeft
-                : settings.getCurrentProfile().actionsRight;
+    private Actions[] getCurrentActions() {
+
+        Actions[] currentActions;
+
+        switch (currentState) {
+            case ROW:
+                currentActions = currentDirection == LEFT ? settings.getCurrentProfile().actionsLeft
+                        : settings.getCurrentProfile().actionsRight;
+                break;
+            case LAYER_SWAP:
+                currentActions = settings.getCurrentProfile().actionsLayerSwap;
+                break;
+            default:
+                currentActions = new Actions[0];
+                AutofarmingClient.LOGGER.error("No current actions to return. THIS SHOULD NOT HAPPEN!");
+                break;
+        }
+
+        return currentActions;
     }
 
     private long getMoodClickDelay() {
