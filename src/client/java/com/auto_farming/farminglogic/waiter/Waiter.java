@@ -7,17 +7,21 @@ import com.auto_farming.AutofarmingClient;
 public abstract class Waiter {
 
     protected static final long POLLING_INTERVAL = 100;
-    protected Thread farmingThread;
+    protected boolean isActive;
 
     protected long pausedTime = 0;
 
     public Waiter() {
     }
 
+    public void kill() {
+        isActive = false;
+    }
+
     protected long plannedWait(long durationMillis, long chunkSize, BiConsumer<Long, Long> afterIntervall) {
         long elapsedTime = 0;
 
-        while (elapsedTime < durationMillis && !Thread.currentThread().isInterrupted()) {
+        while (isActive && elapsedTime < durationMillis) {
 
             long remainingTime = durationMillis - elapsedTime;
             long sleepChunk = Math.min(chunkSize, remainingTime);
@@ -48,8 +52,7 @@ public abstract class Waiter {
         try {
             Thread.sleep(durationMillis);
         } catch (InterruptedException e) {
-            AutofarmingClient.LOGGER.error(e.getMessage());
-            Thread.currentThread().interrupt();
+            AutofarmingClient.LOGGER.error(e.getMessage(), e);
         }
 
         return (System.nanoTime() - sleepStart) / 1_000_000;

@@ -51,17 +51,14 @@ public class AutoFarm extends PauseableDisruptWaiter {
     public void start(Direction startingDirection) {
         this.startingDirection = startingDirection;
 
-        farmingThread = Thread.ofPlatform().start(() -> {
+        Thread.ofPlatform().start(() -> {
             checkPause();
             runFarm();
         });
     }
 
-    public void kill() {
-        farmingThread.interrupt();
-    }
-
     private void onStart() {
+        isActive = true;
         BlockBreakDetection.startDetection(settings.getBufferSize(), settings.getMinimumAverageBps());
         AutoSoundMuter.activate();
         setPaused(false);
@@ -98,7 +95,7 @@ public class AutoFarm extends PauseableDisruptWaiter {
                 currentState = ROW;
                 clearRow();
 
-                if (farmingThread.isInterrupted())
+                if (!isActive)
                     break;
 
                 if (settings.getCurrentProfile().layerSwapTime != 0) {
@@ -109,13 +106,13 @@ public class AutoFarm extends PauseableDisruptWaiter {
                 toggleDirection();
             }
 
-            if (farmingThread.isInterrupted())
+            if (!isActive)
                 break;
 
             currentState = VOID_DROP;
             handleVoidDrop();
 
-            if (farmingThread.isInterrupted())
+            if (!isActive)
                 break;
 
             currentState = DISABLED;

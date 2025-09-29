@@ -35,20 +35,20 @@ public abstract class DisruptHandler extends Waiter {
 
     public void handleDisrupts() {
 
-        if (Thread.interrupted() || disruptQueue.isEmpty())
+        if (!isActive || disruptQueue.isEmpty())
             return;
 
         SoundAlert.MAMBO_ALERT.play();
 
         HashSet<Disrupt> executedDisrupts = new HashSet<>();
 
-        while (!Thread.interrupted() && !disruptQueue.isEmpty()) {
+        while (isActive && !disruptQueue.isEmpty()) {
             nextDisrupt = false;
             Disrupt currentDisrupt = disruptQueue.peek();
 
             StatusHUD.setMessage(currentDisrupt.getMessage());
 
-            while (!Thread.interrupted() && !nextDisrupt) {
+            while (isActive && !nextDisrupt) {
                 waitFor(POLLING_INTERVAL);
             }
 

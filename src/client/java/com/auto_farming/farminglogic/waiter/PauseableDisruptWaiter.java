@@ -53,7 +53,7 @@ public abstract class PauseableDisruptWaiter extends DisruptHandler {
             onPause();
             handlePauseState();
             AutofarmingClient.LOGGER.info("Unpausing ...");
-            if (!farmingThread.isInterrupted()) {
+            if (isActive) {
                 onUnpause();
             }
         }
@@ -75,7 +75,7 @@ public abstract class PauseableDisruptWaiter extends DisruptHandler {
     protected void handlePauseState() {
         long pauseStart = System.nanoTime();
 
-        while (!farmingThread.isInterrupted() && (isPaused || isForcePaused)) {
+        while (isActive && (isPaused || isForcePaused)) {
             if (isPaused) {
                 StatusHUD.setMessage("PAUSED - Press " + PAUSE_TOGGLE.toString() + " to resume");
             } else if (isForcePaused) {
@@ -94,7 +94,7 @@ public abstract class PauseableDisruptWaiter extends DisruptHandler {
 
     public void pauseToggle() {
 
-        if (farmingThread.isInterrupted() || isForcePaused)
+        if (!isActive || isForcePaused)
             return;
 
         isPaused = !isPaused;

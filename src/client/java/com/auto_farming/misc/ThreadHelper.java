@@ -19,8 +19,6 @@ public class ThreadHelper {
     }
 
     public static void preciseSleep(long ms) {
-        if (Thread.currentThread().isInterrupted())
-            return;
 
         long start = System.nanoTime();
         long end = start + ms * 1_000_000;
@@ -29,8 +27,7 @@ public class ThreadHelper {
             try {
                 Thread.sleep(ms - 15);
             } catch (InterruptedException e) {
-                AutofarmingClient.LOGGER.error(e.getMessage());
-                Thread.currentThread().interrupt();
+                AutofarmingClient.LOGGER.error(e.getMessage(), e);
                 return;
             }
         }
